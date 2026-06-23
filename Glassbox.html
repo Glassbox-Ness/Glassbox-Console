@@ -460,6 +460,7 @@ const SECTIONS = [
     items: [
       {
         name: 'Maccabi',
+        aliases: ['מכבי', 'מכבי בריאות'],   // ← Hebrew search terms
         url: 'https://consolegb.maccabi.glassboxdigital.io/webinterface/webui/glassbox-hub',
         color: 'c-indigo',
         logoDark:  'https://www.maccabi4u.co.il/media/xtxhwsfh/%D7%9C%D7%95%D7%92%D7%95-%D7%9E%D7%9B%D7%91%D7%99_%D7%90%D7%93%D7%A8-%D7%93%D7%A1%D7%A7%D7%98%D7%95%D7%A4.svg',
@@ -467,6 +468,7 @@ const SECTIONS = [
       },
       {
         name: 'Leumit',
+        aliases: ['לאומית', 'קופת חולים לאומית'],
         url: 'https://consolegb.leumit.glassboxdigital.io/webinterface/webui/glassbox-hub',
         color: 'c-pink',
         logoDark:  'https://www.leumit.co.il/media/rwsdhs1u/36467_113985_leumit_website_bnrs_logo_208x52_05.png?width=208&v=1dc6f559785bda0',
@@ -474,6 +476,7 @@ const SECTIONS = [
       },
       {
         name: 'Mizrahi',
+        aliases: ['מזרחי', 'מזרחי טפחות', 'בנק מזרחי'],
         url: 'https://consolegb.mizrahi.glassboxdigital.io/webinterface/webui/glassbox-hub',
         color: 'c-orange',
         logoDark:  'https://www.mizrahi-tefahot.co.il/media/vlwlbdf2/logo.svg',
@@ -481,6 +484,7 @@ const SECTIONS = [
       },
       {
         name: 'Clal',
+        aliases: ['כלל', 'כלל ביטוח'],
         url: 'https://consolegb.clal.glassboxdigital.io/webinterface/webui/glassbox-hub',
         color: 'c-sky',
         logoDark:  'https://www.clalbit.co.il/AngularClient/dist/assets/images/header/logo-eng-heb.svg',
@@ -488,6 +492,7 @@ const SECTIONS = [
       },
       {
         name: 'WeSure',
+        aliases: ['וישור', 'וי שור'],
         url: 'https://consolegb.wesure.glassboxdigital.io/webinterface/webui/glassbox-hub',
         color: 'c-rose',
         logoDark:  'https://we-sure.co.il/wp-content/themes/wesure/dist/images/logo.png',
@@ -495,6 +500,7 @@ const SECTIONS = [
       },
       {
         name: 'Govi',
+        aliases: ['גובי', 'ממשלה', 'gov'],
         url: 'https://consolegb.govi.glassboxdigital.io/webinterface/webui',
         color: 'c-teal',
         logoDark:  'https://www.gov.il/govilHF/cdn/favicon.ico',
@@ -502,6 +508,7 @@ const SECTIONS = [
       },
       {
         name: 'mCourt',
+        aliases: ['בית משפט', 'בתי משפט', 'mcourt'],
         url: 'https://consolegb.mcourt-il.glassboxdigital.io/webinterface/webui',
         color: 'c-sky',
         logoDark:  'https://www.court.gov.il/NGCS.Web.Site/Images/favicon.ico',
@@ -510,6 +517,7 @@ const SECTIONS = [
       {
         name: 'Jerusalem Bank',
         sub: 'JBNK',
+        aliases: ['בנק ירושלים', 'ירושלים'],
         url: 'https://consolegb.jbnk.glassboxdigital.io/webinterface/webui/glassbox-hub',
         color: 'c-amber',
         logoDark:  'https://www.bankjerusalem.co.il/media/5799/logo-heb.svg?width=190&height=30',
@@ -569,7 +577,7 @@ function buildCard(item, tsLabel) {
     : `<span class="monogram">${monogram(item.name)}</span>`;
   return `
 <a href="${item.url}" class="card ${item.color}" target="_blank" rel="noopener"
-   data-name="${item.name.toLowerCase()} ${(item.sub||'').toLowerCase()}"
+   data-name="${[item.name, item.sub||'', ...(item.aliases||[])].join(' ').toLowerCase()}"
    data-url="${item.url}">
   <div class="card-bar"></div>
   <div class="card-img">${imgs}</div>
@@ -684,13 +692,21 @@ const searchEl  = document.getElementById('search');
 const noResults = document.getElementById('noResults');
 
 function runSearch(q) {
-  q = q.toLowerCase().trim();
+  q = q.trim();
+  const qLower = q.toLowerCase();
+  const secRecent = document.getElementById('sec-recent');
+
+  // Hide recently visited while actively searching
+  if (secRecent) secRecent.style.display = q ? 'none' : '';
+
   let total = 0;
   document.querySelectorAll('[data-section]').forEach(sec => {
-    if (sec.id === 'sec-recent') return; // always show recent
+    if (sec.id === 'sec-recent') return; // handled above
     let vis = 0;
     sec.querySelectorAll('.card').forEach(card => {
-      const match = !q || (card.dataset.name||'').includes(q);
+      // data-name already contains English + Hebrew aliases, no need to lowercase Hebrew
+      const haystack = card.dataset.name || '';
+      const match = !q || haystack.includes(qLower) || haystack.includes(q);
       card.style.display = match ? '' : 'none';
       if (match) vis++;
     });
