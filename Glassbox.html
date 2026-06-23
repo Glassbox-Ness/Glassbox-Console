@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glassbox Console</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Brand accents */
+  --a-violet:  #7c5cfc;
+  --a-indigo:  #4f6ef7;
+  --a-pink:    #f25a97;
+  --a-orange:  #f0892a;
+  --a-sky:     #38b6ff;
+  --a-teal:    #1fc8a4;
+  --a-amber:   #f5a623;
+  --a-rose:    #f74f6e;
+}
+
+:root[data-theme="dark"] {
+  --bg:           #080a10;
+  --bg2:          #0d1018;
+  --surface:      #111520;
+  --surface2:     #181c2a;
+  --surface3:     #1f2438;
+  --border:       rgba(255,255,255,0.06);
+  --border-h:     rgba(255,255,255,0.14);
+  --text:         #e8eaf5;
+  --text-sub:     #8b91b0;
+  --text-dim:     #454d6b;
+  --glow:         rgba(124,92,252,0.18);
+  --header-bg:    rgba(8,10,16,0.88);
+  --shadow-card:  0 8px 32px rgba(0,0,0,0.45);
+  --shadow-hover: 0 20px 60px rgba(0,0,0,0.6);
+  --kbd-bg:       #1f2438;
+}
+
+:root[data-theme="light"] {
+  --bg:           #f0f2fa;
+  --bg2:          #e8eaf5;
+  --surface:      #ffffff;
+  --surface2:     #f4f5fb;
+  --surface3:     #eaecf7;
+  --border:       rgba(0,0,0,0.07);
+  --border-h:     rgba(0,0,0,0.16);
+  --text:         #0d1020;
+  --text-sub:     #5b6380;
+  --text-dim:     #9ca3bf;
+  --glow:         rgba(124,92,252,0.08);
+  --header-bg:    rgba(240,242,250,0.9);
+  --shadow-card:  0 4px 20px rgba(0,0,0,0.08);
+  --shadow-hover: 0 16px 48px rgba(0,0,0,0.14);
+  --kbd-bg:       #e8eaf5;
+}
+
+/* ── LAYOUT ── */
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--text);
+  display: flex; flex-direction: column;
+  transition: background .3s, color .3s;
+  overflow-x: hidden;
+}
+
+/* ambient glow orbs */
+body::before, body::after {
+  content: '';
+  position: fixed; pointer-events: none; z-index: 0;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: .35;
+}
+body::before {
+  width: 600px; height: 600px;
+  background: var(--a-violet);
+  top: -200px; left: -200px;
+}
+body::after {
+  width: 500px; height: 500px;
+  background: var(--a-indigo);
+  bottom: -100px; right: -100px;
+}
+[data-theme="light"] body::before,
+[data-theme="light"] body::after { opacity: .06; }
+
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  padding: 0 40px;
+  height: 60px;
+  background: var(--header-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 16px;
+  transition: background .3s, border-color .3s;
+}
+
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none; flex-shrink: 0;
+}
+.logo-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--a-violet), var(--a-indigo));
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 1px rgba(124,92,252,.4), 0 4px 12px rgba(124,92,252,.35);
+}
+.logo-icon svg { width: 17px; height: 17px; }
+.logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: -0.02em; }
+
+/* search */
+.search-wrap {
+  flex: 1; max-width: 340px;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 0 12px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.search-wrap:focus-within {
+  border-color: var(--a-violet);
+  box-shadow: 0 0 0 3px rgba(124,92,252,.15);
+}
+.search-wrap svg { color: var(--text-dim); flex-shrink: 0; }
+#search {
+  flex: 1; background: none; border: none; outline: none;
+  font: inherit; font-size: 13px; color: var(--text);
+  padding: 8px 0;
+}
+#search::placeholder { color: var(--text-dim); }
+.search-kbd {
+  font-size: 10px; font-weight: 600;
+  color: var(--text-dim);
+  background: var(--kbd-bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 2px 6px;
+  letter-spacing: .04em;
+  flex-shrink: 0;
+}
+
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+
+/* pill stats */
+.stat-pill {
+  font-size: 11px; font-weight: 600; letter-spacing: .03em;
+  color: var(--text-sub);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 12px;
+  display: flex; align-items: center; gap: 5px;
+  white-space: nowrap;
+}
+.stat-pill .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--a-teal);
+  box-shadow: 0 0 6px var(--a-teal);
+  flex-shrink: 0;
+}
+
+/* theme toggle */
+.toggle-btn {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 15px;
+  transition: background .2s, border-color .2s, transform .15s;
+}
+.toggle-btn:hover { background: var(--surface3); border-color: var(--border-h); transform: scale(1.07); }
+
+/* ── MAIN ── */
+main {
+  flex: 1; position: relative; z-index: 1;
+  padding: 36px 40px;
+  max-width: 1500px; width: 100%; margin: 0 auto;
+}
+
+/* no-results */
+.no-results {
+  display: none; flex-direction: column; align-items: center;
+  gap: 12px; padding: 80px 20px; text-align: center;
+}
+.no-results.visible { display: flex; }
+.no-results svg { color: var(--text-dim); }
+.no-results h3 { font-size: 17px; font-weight: 700; }
+.no-results p { font-size: 13px; color: var(--text-sub); }
+
+/* ── SECTION ── */
+.section { margin-bottom: 44px; }
+.section-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 18px; cursor: pointer; user-select: none;
+}
+.section-header:hover .section-toggle { border-color: var(--border-h); }
+.section-eyebrow {
+  font-size: 10px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--text-dim);
+}
+.section-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px; font-weight: 700; letter-spacing: -.03em;
+}
+.section-count {
+  font-size: 11px; font-weight: 700;
+  color: var(--text-sub);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+.section-toggle {
+  margin-left: auto;
+  width: 26px; height: 26px; border-radius: 7px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-dim);
+  transition: border-color .2s, transform .25s;
+}
+.section.collapsed .section-toggle { transform: rotate(-90deg); }
+.section-body { transition: opacity .25s; }
+.section.collapsed .section-body { display: none; }
+
+/* ── GRID ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+/* ── CARD ── */
+.card {
+  position: relative;
+  display: flex; flex-direction: column;
+  height: 200px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .22s cubic-bezier(.34,1.3,.64,1),
+              box-shadow .22s ease,
+              border-color .22s ease;
+}
+.card:hover {
+  transform: translateY(-5px) scale(1.012);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--border-h);
+}
+/* animated gradient border on hover */
+.card::before {
+  content: '';
+  position: absolute; inset: 0; border-radius: 16px; z-index: 0;
+  background: linear-gradient(135deg, var(--card-color, var(--a-violet)), transparent 60%);
+  opacity: 0;
+  transition: opacity .3s;
+  pointer-events: none;
+}
+.card:hover::before { opacity: .09; }
+
+/* accent bar */
+.card-bar {
+  height: 3px; width: 100%; flex-shrink: 0;
+  background: linear-gradient(90deg, var(--card-color, var(--a-violet)), color-mix(in srgb, var(--card-color, var(--a-violet)) 60%, transparent));
+  position: relative; z-index: 1;
+}
+
+/* logo area */
+.card-img {
+  flex: 1; position: relative;
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.card-img img {
+  max-width: 70%; max-height: 55%;
+  object-fit: contain;
+  transition: transform .3s ease;
+  position: relative; z-index: 1;
+}
+.card:hover .card-img img { transform: scale(1.07); }
+
+/* dual-theme images */
+.img-dark  { display: block; }
+.img-light { display: none; }
+[data-theme="light"] .img-dark  { display: none; }
+[data-theme="light"] .img-light { display: block; }
+
+/* fallback monogram */
+.monogram {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 42px; font-weight: 800; letter-spacing: -.05em;
+  color: var(--card-color, var(--a-violet));
+  opacity: .2;
+  position: relative; z-index: 1;
+}
+
+/* footer */
+.card-foot {
+  padding: 12px 14px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+  position: relative; z-index: 1;
+  transition: background .3s;
+}
+.card-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px; font-weight: 700; letter-spacing: -.03em;
+  color: var(--text); line-height: 1.2;
+}
+.card-sub {
+  font-size: 10px; font-weight: 500; color: var(--text-sub);
+  margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 130px;
+}
+.card-arrow {
+  width: 28px; height: 28px; flex-shrink: 0;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-sub);
+  opacity: 0;
+  transform: translateX(-4px) translateY(4px);
+  transition: opacity .18s, transform .18s, background .18s, border-color .18s;
+}
+.card:hover .card-arrow {
+  opacity: 1; transform: none;
+  background: var(--surface3);
+  border-color: var(--card-color, var(--a-violet));
+  color: var(--card-color, var(--a-violet));
+}
+
+/* color classes */
+.c-violet { --card-color: var(--a-violet); }
+.c-indigo { --card-color: var(--a-indigo); }
+.c-pink   { --card-color: var(--a-pink);   }
+.c-orange { --card-color: var(--a-orange); }
+.c-sky    { --card-color: var(--a-sky);    }
+.c-teal   { --card-color: var(--a-teal);   }
+.c-amber  { --card-color: var(--a-amber);  }
+.c-rose   { --card-color: var(--a-rose);   }
+
+/* add card */
+.card-add {
+  border-style: dashed;
+  border-color: var(--border);
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── FOOTER ── */
+footer {
+  position: relative; z-index: 1;
+  padding: 14px 40px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  font-size: 11px; color: var(--text-dim); font-weight: 500;
+  transition: border-color .3s;
+}
+.footer-center { color: var(--text-sub); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  header { padding: 0 16px; gap: 10px; }
+  main { padding: 24px 16px; }
+  footer { padding: 12px 16px; flex-direction: column; gap: 4px; text-align: center; }
+  .search-wrap { max-width: none; }
+  .stat-pill { display: none; }
+  .search-kbd { display: none; }
+}
+@media (max-width: 480px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* highlight match */
+.hl { background: rgba(124,92,252,.35); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="#">
+    <div class="logo-icon">
+      <svg viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="6" height="6" rx="1.8" fill="white" opacity=".95"/>
+        <rect x="9" y="1" width="6" height="6" rx="1.8" fill="white" opacity=".6"/>
+        <rect x="1" y="9" width="6" height="6" rx="1.8" fill="white" opacity=".6"/>
+        <rect x="9" y="9" width="6" height="6" rx="1.8" fill="white" opacity=".3"/>
+      </svg>
+    </div>
+    <span class="logo-text">Glassbox Console</span>
+  </a>
+
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search environments…" autocomplete="off" spellcheck="false">
+    <span class="search-kbd">⌘ K</span>
+  </div>
+
+  <div class="header-right">
+    <div class="stat-pill"><span class="dot"></span><span id="activeCount">0</span> environments</div>
+    <button class="toggle-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">
+      <span id="themeIcon">☀️</span>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+  <div class="no-results" id="noResults">
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="18" cy="18" r="11" stroke="currentColor" stroke-width="2"/><path d="M26.5 26.5L35 35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13 18h10M18 13v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <h3>No environments found</h3>
+    <p>Try a different search term.</p>
+  </div>
+</main>
+
+<footer>
+  <span>v2.0 — Glassbox Console</span>
+  <span class="footer-center">Internal Dashboard · Shay Danny</span>
+  <span id="clock"></span>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════
+   ██  CONFIGURATION  — Edit this to add/remove environments
+   ═══════════════════════════════════════════
+   Each entry: {
+     name:     string          — display name
+     sub:      string          — subtitle (optional)
+     url:      string          — link href
+     color:    string          — accent class: c-violet | c-indigo | c-pink | c-orange | c-sky | c-teal | c-amber | c-rose
+     logoDark: string          — logo URL for dark mode (optional)
+     logoLight:string          — logo URL for light mode (optional; falls back to logoDark)
+   }
+ */
+
+const SECTIONS = [
+  {
+    id: 'glassbox',
+    eyebrow: 'Internal',
+    name: 'Glassbox',
+    items: [
+      {
+        name: 'GB Demo',
+        url: 'https://console.gbdemo.glassboxdigital.io/webinterface/webui/glassbox-hub',
+        color: 'c-violet',
+        logoDark:  'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg',
+        logoLight: 'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg',
+      },
+      {
+        name: 'GB POV',
+        url: 'https://console.gb-pov.glassboxdigital.io/webinterface/login/',
+        color: 'c-violet',
+        logoDark:  'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg',
+        logoLight: 'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg',
+      },
+    ],
+  },
+  {
+    id: 'customers',
+    eyebrow: 'Live',
+    name: 'Customers',
+    items: [
+      {
+        name: 'Maccabi',
+        url: 'https://consolegb.maccabi.glassboxdigital.io/webinterface/webui/glassbox-hub',
+        color: 'c-indigo',
+        logoDark:  'https://www.maccabi4u.co.il/media/xtxhwsfh/%D7%9C%D7%95%D7%92%D7%95-%D7%9E%D7%9B%D7%91%D7%99_%D7%90%D7%93%D7%A8-%D7%93%D7%A1%D7%A7%D7%98%D7%95%D7%A4.svg',
+        logoLight: 'https://www.maccabi4u.co.il/media/xtxhwsfh/%D7%9C%D7%95%D7%92%D7%95-%D7%9E%D7%9B%D7%91%D7%99_%D7%90%D7%93%D7%A8-%D7%93%D7%A1%D7%A7%D7%98%D7%95%D7%A4.svg',
+      },
+      {
+        name: 'Leumit',
+        url: 'https://consolegb.leumit.glassboxdigital.io/webinterface/webui/glassbox-hub',
+        color: 'c-pink',
+        logoDark:  'https://www.leumit.co.il/media/rwsdhs1u/36467_113985_leumit_website_bnrs_logo_208x52_05.png?width=208&v=1dc6f559785bda0',
+        logoLight: 'https://www.leumit.co.il/media/pxvdlhty/36467_113985_leumit_website_bnrs_logo_208x52_02.png?width=208&v=1dc6f559791f2a0',
+      },
+      {
+        name: 'Mizrahi',
+        url: 'https://consolegb.mizrahi.glassboxdigital.io/webinterface/webui/glassbox-hub',
+        color: 'c-orange',
+        logoDark:  'https://www.mizrahi-tefahot.co.il/media/vlwlbdf2/logo.svg',
+        logoLight: 'https://www.mizrahi-tefahot.co.il/media/vlwlbdf2/logo.svg',
+      },
+      {
+        name: 'Clal',
+        url: 'https://consolegb.clal.glassboxdigital.io/webinterface/webui/glassbox-hub',
+        color: 'c-sky',
+        logoDark:  'https://www.clalbit.co.il/AngularClient/dist/assets/images/header/logo-eng-heb.svg',
+        logoLight: 'https://www.clalbit.co.il/AngularClient/dist/assets/images/header/logo-eng-heb.svg',
+      },
+      {
+        name: 'WeSure',
+        url: 'https://consolegb.wesure.glassboxdigital.io/webinterface/webui/glassbox-hub',
+        color: 'c-rose',
+        logoDark:  'https://we-sure.co.il/wp-content/themes/wesure/dist/images/logo.png',
+        logoLight: 'https://we-sure.co.il/wp-content/themes/wesure/dist/images/logo-footer.png',
+      },
+      {
+        name: 'Govi',
+        url: 'https://consolegb.govi.glassboxdigital.io/webinterface/webui',
+        color: 'c-teal',
+        logoDark:  'https://www.gov.il/govilHF/cdn/favicon.ico',
+        logoLight: 'https://www.gov.il/govilHF/cdn/favicon.ico',
+      },
+      {
+        name: 'mCourt',
+        url: 'https://consolegb.mcourt-il.glassboxdigital.io/webinterface/webui',
+        color: 'c-sky',
+        logoDark:  'https://www.court.gov.il/NGCS.Web.Site/Images/favicon.ico',
+        logoLight: 'https://www.court.gov.il/NGCS.Web.Site/Images/favicon.ico',
+      },
+      {
+        name: 'Jerusalem Bank',
+        sub: 'JBNK',
+        url: 'https://consolegb.jbnk.glassboxdigital.io/webinterface/webui/glassbox-hub',
+        color: 'c-amber',
+        logoDark:  'https://www.bankjerusalem.co.il/media/5799/logo-heb.svg?width=190&height=30',
+        logoLight: 'https://www.bankjerusalem.co.il/media/5799/logo-heb.svg',
+      },
+    ],
+  },
+  {
+    id: 'multi-tenant',
+    eyebrow: 'Shared',
+    name: 'Multi Tenant',
+    items: [
+      {
+        name: 'C1101',
+        sub: 'Cellcom & Fattal',
+        url: 'https://console.c1101.glassboxdigital.io/webinterface/login/',
+        color: 'c-violet',
+        logoDark:  'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg',
+        logoLight: 'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg',
+      },
+      /* ↓ ADD NEW ENVIRONMENTS HERE — copy one block and paste below */
+      // {
+      //   name: 'My New Customer',
+      //   sub: 'Optional subtitle',
+      //   url: 'https://consolegb.XXXX.glassboxdigital.io/webinterface/webui/glassbox-hub',
+      //   color: 'c-teal',           // pick from: c-violet c-indigo c-pink c-orange c-sky c-teal c-amber c-rose
+      //   logoDark: 'https://...',    // logo URL
+      // },
+    ],
+  },
+];
+
+/* ═══════════════════════════════════════════
+   ARROW SVG
+ */
+const ARROW_SVG = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M2 10L10 2M10 2H4.5M10 2V7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+const CHEVRON_SVG = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+/* ═══════════════════════════════════════════
+   RENDER
+ */
+function monogram(name) {
+  return name.replace(/[^A-Z0-9]/gi,'').slice(0,2).toUpperCase() || '??';
+}
+
+function buildCard(item) {
+  const hasDark  = item.logoDark  && item.logoDark.trim();
+  const hasLight = item.logoLight && item.logoLight.trim();
+  const sub = item.sub ? `<span class="card-sub">${item.sub}</span>` : '';
+  const imgs = hasDark
+    ? `<img class="img-dark"  src="${item.logoDark}"  alt="${item.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling?.style.setProperty('display',this.classList.contains('img-dark')?'block':'none')">
+       <img class="img-light" src="${hasLight ? item.logoLight : item.logoDark}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'">`
+    : `<span class="monogram">${monogram(item.name)}</span>`;
+
+  return `
+<a href="${item.url}" class="card ${item.color}" target="_blank" rel="noopener" data-name="${item.name.toLowerCase()} ${(item.sub||'').toLowerCase()}">
+  <div class="card-bar"></div>
+  <div class="card-img">${imgs}</div>
+  <div class="card-foot">
+    <div>
+      <div class="card-name">${item.name}</div>
+      ${sub}
+    </div>
+    <span class="card-arrow">${ARROW_SVG}</span>
+  </div>
+</a>`;
+}
+
+function buildSection(sec) {
+  const cards = sec.items.map(buildCard).join('');
+  return `
+<section class="section" id="sec-${sec.id}" data-section>
+  <div class="section-header" data-toggle>
+    <div>
+      <div class="section-eyebrow">${sec.eyebrow}</div>
+      <div class="section-name">${sec.name}</div>
+    </div>
+    <span class="section-count">${sec.items.length}</span>
+    <span class="section-toggle">${CHEVRON_SVG}</span>
+  </div>
+  <div class="section-body">
+    <div class="grid">${cards}</div>
+  </div>
+</section>`;
+}
+
+const main = document.getElementById('main');
+const frag = SECTIONS.map(buildSection).join('');
+main.insertAdjacentHTML('afterbegin', frag);
+
+/* ═══════════════════════════════════════════
+   STATS
+ */
+const totalActive = SECTIONS.reduce((a,s) => a + s.items.length, 0);
+document.getElementById('activeCount').textContent = totalActive;
+
+/* ═══════════════════════════════════════════
+   COLLAPSE
+ */
+document.querySelectorAll('[data-toggle]').forEach(hdr => {
+  hdr.addEventListener('click', () => {
+    hdr.closest('[data-section]').classList.toggle('collapsed');
+  });
+});
+
+/* ═══════════════════════════════════════════
+   SEARCH
+ */
+const searchEl = document.getElementById('search');
+const noResults = document.getElementById('noResults');
+
+function runSearch(q) {
+  q = q.toLowerCase().trim();
+  let totalVisible = 0;
+
+  document.querySelectorAll('[data-section]').forEach(sec => {
+    let secVisible = 0;
+    sec.querySelectorAll('.card').forEach(card => {
+      const haystack = card.dataset.name || '';
+      const match = !q || haystack.includes(q);
+      card.style.display = match ? '' : 'none';
+      if (match) secVisible++;
+    });
+    sec.style.display = secVisible === 0 ? 'none' : '';
+    totalVisible += secVisible;
+  });
+
+  noResults.classList.toggle('visible', totalVisible === 0 && q !== '');
+}
+
+searchEl.addEventListener('input', e => runSearch(e.target.value));
+
+/* ⌘K / Ctrl+K to focus search */
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault(); searchEl.focus(); searchEl.select();
+  }
+  if (e.key === 'Escape' && document.activeElement === searchEl) {
+    searchEl.value = ''; runSearch(''); searchEl.blur();
+  }
+});
+
+/* ═══════════════════════════════════════════
+   THEME
+ */
+const root = document.documentElement;
+const themeIcon = document.getElementById('themeIcon');
+function applyTheme(t) {
+  root.setAttribute('data-theme', t);
+  themeIcon.textContent = t === 'dark' ? '☀️' : '🌙';
+  localStorage.setItem('gb-theme', t);
+}
+applyTheme(localStorage.getItem('gb-theme') || 'dark');
+document.getElementById('themeBtn').addEventListener('click', () => {
+  applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+
+/* ═══════════════════════════════════════════
+   CLOCK
+ */
+const clockEl = document.getElementById('clock');
+const tick = () => clockEl.textContent = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+tick(); setInterval(tick, 30000);
+</script>
+</body>
+</html>
