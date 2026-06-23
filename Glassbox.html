@@ -9,14 +9,30 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --a-violet: #7c5cfc;
-  --a-indigo: #4f6ef7;
-  --a-pink:   #f25a97;
-  --a-orange: #f0892a;
-  --a-sky:    #38b6ff;
-  --a-teal:   #1fc8a4;
-  --a-amber:  #f5a623;
-  --a-rose:   #f74f6e;
+   --a-violet:    #7c5cfc;
+   --a-indigo:    #4f6ef7;
+   --a-pink:      #f25a97;
+   --a-orange:    #f0892a;
+   --a-sky:       #38b6ff;
+   --a-teal:      #1fc8a4;
+   --a-amber:     #f5a623;
+   --a-rose:      #f74f6e;
+   --a-lime:      #84cc16;
+   --a-emerald:   #10b981;
+   --a-cyan:      #06b6d4;
+   --a-blue:      #3b82f6;
+   --a-purple:    #8b5cf6;
+   --a-fuchsia:   #d946ef;
+   --a-red:       #ef4444;
+   --a-crimson:   #dc2626;
+   --a-yellow:    #eab308;
+   --a-gold:      #fbbf24;
+   --a-green:     #22c55e;
+   --a-mint:      #34d399;
+   --a-aqua:      #2dd4bf;
+   --a-cobalt:    #2563eb;
+   --a-plum:      #9333ea;
+   --a-magenta:   #ec4899;
 }
 :root[data-theme="dark"] {
   --bg:           #080a10;
@@ -320,14 +336,30 @@ main {
 }
 
 /* color accents */
-.c-violet { --card-color: var(--a-violet); }
-.c-indigo { --card-color: var(--a-indigo); }
-.c-pink   { --card-color: var(--a-pink);   }
-.c-orange { --card-color: var(--a-orange); }
-.c-sky    { --card-color: var(--a-sky);    }
-.c-teal   { --card-color: var(--a-teal);   }
-.c-amber  { --card-color: var(--a-amber);  }
-.c-rose   { --card-color: var(--a-rose);   }
+.c-violet  { --card-color: var(--a-violet);  }
+.c-indigo  { --card-color: var(--a-indigo);  }
+.c-pink    { --card-color: var(--a-pink);    }
+.c-orange  { --card-color: var(--a-orange);  }
+.c-sky     { --card-color: var(--a-sky);     }
+.c-teal    { --card-color: var(--a-teal);    }
+.c-amber   { --card-color: var(--a-amber);   }
+.c-rose    { --card-color: var(--a-rose);    }
+.c-lime    { --card-color: var(--a-lime);    }
+.c-emerald { --card-color: var(--a-emerald); }
+.c-cyan    { --card-color: var(--a-cyan);    }
+.c-blue    { --card-color: var(--a-blue);    }
+.c-purple  { --card-color: var(--a-purple);  }
+.c-fuchsia { --card-color: var(--a-fuchsia); }
+.c-red     { --card-color: var(--a-red);     }
+.c-crimson { --card-color: var(--a-crimson); }
+.c-yellow  { --card-color: var(--a-yellow);  }
+.c-gold    { --card-color: var(--a-gold);    }
+.c-green   { --card-color: var(--a-green);   }
+.c-mint    { --card-color: var(--a-mint);    }
+.c-aqua    { --card-color: var(--a-aqua);    }
+.c-cobalt  { --card-color: var(--a-cobalt);  }
+.c-plum    { --card-color: var(--a-plum);    }
+.c-magenta { --card-color: var(--a-magenta); }
 
 /* ── FOOTER ── */
 footer {
@@ -568,7 +600,7 @@ const SECTIONS = [
         name: 'Mimun',
         aliases: ['מימון ישיר'],
         url: 'https://consolegb.mimun.glassboxdigital.io/webinterface/webui/',
-        color: 'c-amber',
+        color: 'c-green',
         logoDark:  'https://my.5555.co.il/Content/img/logo-footer.svg',
         logoLight: 'https://my.5555.co.il/Content/img/logo-footer.svg',
       },
