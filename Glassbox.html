@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glassbox Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root[data-theme="dark"] {
+    --bg: #0b0d12;
+    --surface: #13161f;
+    --surface2: #1c2030;
+    --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(255,255,255,0.16);
+    --text-primary: #eef0f7;
+    --text-muted: #6b738f;
+    --shadow: rgba(0,0,0,0.5);
+    --toggle-bg: #1c2030;
+    --toggle-knob: #eef0f7;
+    --header-blur: rgba(11,13,18,0.85);
+  }
+  :root[data-theme="light"] {
+    --bg: #eef0f7;
+    --surface: #ffffff;
+    --surface2: #e2e5ef;
+    --border: rgba(0,0,0,0.07);
+    --border-hover: rgba(0,0,0,0.16);
+    --text-primary: #0f1220;
+    --text-muted: #6b738f;
+    --shadow: rgba(0,0,0,0.10);
+    --toggle-bg: #d4d8e8;
+    --toggle-knob: #0f1220;
+    --header-blur: rgba(238,240,247,0.85);
+  }
+  :root {
+    --c1: #3c56e7;
+    --c2: #833ce7;
+    --c3: #e73ca5;
+    --c4: #e07b12;
+	/*Clal*/
+	--c5: #3c8ce7;
+	/*WeSure*/
+	--c6: #e73c7b;
+	/*Mcourt*/
+	--c8: #3c8ce7;
+	/*JBNK*/
+	--c9: 	#e7a83c;	
+  }
+
+  body {
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    color: var(--text-primary);
+    display: flex; flex-direction: column;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ── Header ── */
+  header {
+    padding: 18px 40px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px;
+    position: sticky; top: 0;
+    background: var(--header-blur);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 10;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .logo-mark {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .logo-mark svg { width: 20px; height: 20px; }
+  header h1 { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 20px; }
+  header p { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+  /* ── Theme toggle ── */
+  .theme-toggle {
+    position: relative; width: 50px; height: 27px;
+    background: var(--toggle-bg); border-radius: 999px;
+    border: 1px solid var(--border); cursor: pointer;
+    transition: background 0.25s, border-color 0.25s; flex-shrink: 0;
+  }
+  .theme-toggle::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 19px; height: 19px; border-radius: 50%;
+    background: var(--toggle-knob);
+    transition: transform 0.25s, background 0.25s;
+  }
+  [data-theme="light"] .theme-toggle::after { transform: translateX(23px); }
+  .toggle-icon { position: absolute; top: 50%; transform: translateY(-50%); font-size: 11px; pointer-events: none; }
+  .toggle-icon.moon { left: 6px; }
+  .toggle-icon.sun  { right: 6px; }
+  [data-theme="dark"]  .toggle-icon.sun  { opacity: 0.3; }
+  [data-theme="light"] .toggle-icon.moon { opacity: 0.3; }
+
+  /* ── Main ── */
+  main { flex: 1; padding: 40px; max-width: 1440px; width: 100%; margin: 0 auto; }
+  .section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.13em;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 20px;
+  }
+
+  /* ── Section spacing ── */
+  .section-block { margin-bottom: 40px; }
+
+  /* ── Grid ── */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; }
+
+  /* ── Card ── */
+  .card {
+    position: relative;
+    display: flex; flex-direction: column;
+    padding: 0;
+    height: 180px;
+    border-radius: 16px;
+    text-decoration: none;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px var(--shadow);
+    border-color: var(--border-hover);
+  }
+
+  /* top color bar */
+  .card-bar {
+    height: 4px; width: 100%; flex-shrink: 0;
+    background: var(--card-color, var(--c1));
+  }
+
+  /* image area */
+  .card-img {
+    width: 100%; flex: 1;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+  .card-img img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    padding: 14px;
+    transition: transform 0.25s ease;
+    position: absolute; top: 0; left: 0;
+  }
+  .card:hover .card-img img { transform: scale(1.05); }
+
+  /* dual-theme images */
+  .img-dark  { display: block; }
+  .img-light { display: none;  }
+  [data-theme="light"] .img-dark  { display: none;  }
+  [data-theme="light"] .img-light { display: block; }
+
+  /* fallback initials when no image */
+  .card-img .initials {
+    font-size: 36px; font-weight: 800; letter-spacing: -0.04em;
+    color: var(--card-color, var(--c1));
+    opacity: 0.25;
+    user-select: none;
+    position: relative;
+  }
+
+  /* bottom label */
+  .card-footer {
+    padding: 14px 16px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    transition: background 0.3s;
+  }
+  .card-info { display: flex; flex-direction: column; }
+  .card-name {
+    font-size: 22px; font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.04em; line-height: 1.15;
+  }
+  .card-sub { display: none; }
+  .card-arrow {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    opacity: 0; transform: translate(-4px, 4px);
+    transition: opacity 0.18s, transform 0.18s, background 0.18s, border-color 0.18s;
+    flex-shrink: 0;
+  }
+  .card:hover .card-arrow {
+    opacity: 1; transform: translate(0,0);
+    background: var(--surface2);
+    border-color: var(--border-hover);
+  }
+
+  /* color themes */
+  .card.c1 { --card-color: var(--c1); }
+  .card.c2 { --card-color: var(--c2); }
+  .card.c3 { --card-color: var(--c3); }
+  .card.c4 { --card-color: var(--c4); }
+  .card.c5 { --card-color: var(--c5); }
+  .card.c6 { --card-color: var(--c6); }
+  .card.c7 { --card-color: var(--c7); }
+  .card.c8 { --card-color: var(--c8); }
+  .card.c9 { --card-color: var(--c9); }
+  .card.c10 { --card-color: var(--c10); }  
+
+  /* placeholder */
+  .card.placeholder { opacity: 0.3; pointer-events: none; border-style: dashed; }
+
+  /* ── Footer ── */
+  footer {
+    padding: 16px 40px; border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--text-muted); font-weight: 500;
+    display: flex; justify-content: space-between; align-items: center;
+    transition: border-color 0.3s;
+  }
+
+  @media (max-width: 600px) {
+    main { padding: 24px 16px; }
+    header { padding: 14px 16px; }
+    footer { padding: 12px 16px; flex-direction: column; gap: 4px; }
+    .header-right p { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">
+    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2"  y="2"  width="7" height="7" rx="2" fill="white" opacity="0.9"/>
+      <rect x="11" y="2"  width="7" height="7" rx="2" fill="white" opacity="0.6"/>
+      <rect x="2"  y="11" width="7" height="7" rx="2" fill="white" opacity="0.6"/>
+      <rect x="11" y="11" width="7" height="7" rx="2" fill="white" opacity="0.3"/>
+    </svg>
+  </div>
+  <h1>Glassbox Console</h1>
+  <div class="header-right">
+    <p>Quick Access Dashboard</p>
+    <button class="theme-toggle" id="themeToggle" title="Toggle dark / light mode" aria-label="Toggle theme">
+      <span class="toggle-icon moon">🌙</span>
+      <span class="toggle-icon sun">☀️</span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── Section 1: Glassbox ── -->
+  <div class="section-block">
+    <div class="section-label">Glassbox</div>
+    <div class="grid">
+	      <a href="https://console.gbdemo.glassboxdigital.io/webinterface/webui/glassbox-hub"
+         class="card c2" target="_blank" rel="noopener">
+        <div class="card-bar"></div>
+        <div class="card-img">
+          <img class="img-dark"
+               src="https://www.glassbox.com/images/logos/glassbox-logo-dark.svg"
+               alt="GB Demo dark">
+          <img class="img-light"
+               src="https://www.glassbox.com/images/logos/glassbox-logo-dark.svg"
+               alt="GB Demo light">
+          <span class="initials" style="display:none">GB</span>
+        </div>
+        <div class="card-footer">
+          <div class="card-info"><span class="card-name">GB Demo</span></div>
+          <span class="card-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 10.5L10.5 2.5M10.5 2.5H5M10.5 2.5V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+      </a>
+      <!-- GB POV -->	  
+	      <a href="https://console.gb-pov.glassboxdigital.io/webinterface/login/"
+         class="card c2" target="_blank" rel="noopener">
+        <div class="card-bar"></div>
+        <div class="card-img">
+          <img class="img-dark"
+               src="https://www.glassbox.com/images/logos/glassbox-logo-dark.svg"
+               alt="GB Demo dark">
+          <img class="img-light"
+               src="https://www.glassbox.com/images/logos/glassbox-logo-dark.svg"
+               alt="GB Demo light">
+          <span class="initials" style="display:none">GB</span>
+        </div>
+        <div class="card-footer">
+          <div class="card-info"><span class="card-name">GB POV</span></div>
+          <span class="card-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 10.5L10.5 2.5M10.5 2.5H5M10.5 2.5V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+      </a>	  
+      <a href="#" class="card c1 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">01</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 1</span></div></div></a>
+      <a href="#" class="card c2 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">02</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 2</span></div></div></a>
+      <a href="#" class="card c3 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">03</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 3</span></div></div></a>
+      <a href="#" class="card c4 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">04</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 4</span></div></div></a>
+    </div>
+  </div>
+
+  <!-- ── Section 2: Customers ── -->
+  <div class="section-block">
+    <div class="section-label">Customers</div>
+    <div class="grid">
+
+      <!-- MACCABI -->
+      <a href="https://consolegb.maccabi.glassboxdigital.io/webinterface/webui/glassbox-hub"
+         class="card c1" target="_blank" rel="noopener">
+        <div class="card-bar"></div>
+        <div class="card-img">
+          <img class="img-dark"
+               src="https://www.maccabi4u.co.il/media/xtxhwsfh/%D7%9C%D7%95%D7%92%D7%95-%D7%9E%D7%9B%D7%91%D7%99_%D7%90%D7%93%D7%A8-%D7%93%D7%A1%D7%A7%D7%98%D7%95%D7%A4.svg"
+               alt="Maccabi dark">
+          <img class="img-light"
+               src="https://www.maccabi4u.co.il/media/xtxhwsfh/%D7%9C%D7%95%D7%92%D7%95-%D7%9E%D7%9B%D7%91%D7%99_%D7%90%D7%93%D7%A8-%D7%93%D7%A1%D7%A7%D7%98%D7%95%D7%A4.svg"
+               alt="Maccabi light">
+          <span class="initials" style="display:none">MA</span>
+        </div>
+        <div class="card-footer">
+          <div class="card-info"><span class="card-name">Maccabi</span></div>
+          <span class="card-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 10.5L10.5 2.5M10.5 2.5H5M10.5 2.5V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+      </a>
+
+      <!-- LEUMIT -->
+      <a href="https://consolegb.leumit.glassboxdigital.io/webinterface/webui/glassbox-hub"
+         class="card c3" target="_blank" rel="noopener">
+        <div class="card-bar"></div>
+        <div class="card-img">
+          <img class="img-dark"
+               src="https://www.leumit.co.il/media/rwsdhs1u/36467_113985_leumit_website_bnrs_logo_208x52_05.png?width=208&v=1dc6f559785bda0"
+               alt="Leumit dark">
+          <img class="img-light"
+               src="https://www.leumit.co.il/media/pxvdlhty/36467_113985_leumit_website_bnrs_logo_208x52_02.png?width=208&v=1dc6f559791f2a0"
+               alt="Leumit light">
+          <span class="initials" style="display:none">LE</span>
+        </div>
+        <div class="card-footer">
+          <div class="card-info"><span class="card-name">Leumit</span></div>
+          <span class="card-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 10.5L10.5 2.5M10.5 2.5H5M10.5 2.5V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+      </a>
+
+      <!-- MIZRAHI -->
+      <a href="https://consolegb.mizrahi.glassboxdigital.io/webinterface/webui/glassbox-hub"
+         class="card c4" target="_blank" rel="noopener">
+        <div class="card-bar"></div>
+        <div class="card-img">
+          <img class="img-dark"
+               src="https://www.mizrahi-tefahot.co.il/media/vlwlbdf2/logo.svg"
+               alt="Mizrahi dark">
+          <img class="img-light"
+               src="https://www.mizrahi-tefahot.co.il/media/vlwlbdf2/logo.svg"
+               alt="Mizrahi light">
+          <span class="initials" style="display:none">MI</span>
+        </div>
+        <div class="card-footer">
+          <div class="card-info"><span class="card-name">Mizrahi</span></div>
+          <span class="card-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 10.5L10.5 2.5M10.5 2.5H5M10.5 2.5V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+      </a>	  
+
+      <!-- Clal -->
+      <a href="https://consolegb.clal.glassboxdigital.io/webinterface/webui/glassbox-hub"
+         class="card c5" target="_blank" rel="noopener">
+        <div class="card-bar"></div>
+        <div class="card-img">
+          <img class="img-dark"
+               src="https://www.clalbit.co.il/AngularClient/dist/assets/images/header/logo-eng-heb.svg"
+               alt="Clal dark">
+          <img class="img-light"
+               src="https://www.clalbit.co.il/AngularClient/dist/assets/images/header/logo-eng-heb.svg"
+               alt="Clal light">
+          <span class="initials" style="display:none">LE</span>
+        </div>
+        <div class="card-footer">
+          <div class="card-info"><span class="card-name">Clal</span></div>
+          <span class="card-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 10.5L10.5 2.5M10.5 2.5H5M10.5 2.5V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+      </a>	
+	  
+      <!-- WeSure -->
+      <a href="https://consolegb.wesure.glassboxdigital.io/webinterface/webui/glassbox-hub"
+         class="card c6" target="_blank" rel="noopener">
+        <div class="card-bar"></div>
+        <div class="card-img">
+          <img class="img-dark"
+               src="https://we-sure.co.il/wp-content/themes/wesure/dist/images/logo.png"
+               alt="WeSure dark">
+          <img class="img-light"
+               src="https://we-sure.co.il/wp-content/themes/wesure/dist/images/logo-footer.png"
+               alt="WeSure light">
+          <span class="initials" style="display:none">LE</span>
+        </div>
+        <div class="card-footer">
+          <div class="card-info"><span class="card-name">WeSure</span></div>
+          <span class="card-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 10.5L10.5 2.5M10.5 2.5H5M10.5 2.5V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+      </a>		  
+
+      <!-- Govi -->
+      <a href="https://consolegb.govi.glassboxdigital.io/webinterface/webui"
+         class="card c7" target="_blank" rel="noopener">
+        <div class="card-bar"></div>
+        <div class="card-img">
+          <img class="img-dark"
+               src="https://www.gov.il/govilHF/cdn/favicon.ico"
+               alt="Govi dark">
+          <img class="img-light"
+               src="https://www.gov.il/govilHF/cdn/favicon.ico"
+               alt="Govi light">
+          <span class="initials" style="display:none">MI</span>
+        </div>
+        <div class="card-footer">
+          <div class="card-info"><span class="card-name">Govi</span></div>
+          <span class="card-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 10.5L10.5 2.5M10.5 2.5H5M10.5 2.5V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+      </a>
+
+      <!-- mcourt -->
+      <a href="https://consolegb.mcourt-il.glassboxdigital.io/webinterface/webui"
+         class="card c8" target="_blank" rel="noopener">
+        <div class="card-bar"></div>
+        <div class="card-img">
+          <img class="img-dark"
+               src="https://www.court.gov.il/NGCS.Web.Site/Images/favicon.ico"
+               alt="mcourt dark">
+          <img class="img-light"
+               src="https://www.court.gov.il/NGCS.Web.Site/Images/favicon.ico"
+               alt="mcourt light">
+          <span class="initials" style="display:none">MI</span>
+        </div>
+        <div class="card-footer">
+          <div class="card-info"><span class="card-name">mcourt</span></div>
+          <span class="card-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 10.5L10.5 2.5M10.5 2.5H5M10.5 2.5V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+      </a>
+
+      <!-- JBNK -->
+      <a href="https://consolegb.jbnk.glassboxdigital.io/webinterface/webui/glassbox-hub"
+         class="card c9" target="_blank" rel="noopener">
+        <div class="card-bar"></div>
+        <div class="card-img">
+          <img class="img-dark"
+               src="https://www.bankjerusalem.co.il/media/5799/logo-heb.svg?width=190&height=30"
+               alt="JBNK dark">
+          <img class="img-light"
+               src="https://www.bankjerusalem.co.il/media/5799/logo-heb.svg"
+               alt="JBNK light">
+          <span class="initials" style="display:none">MI</span>
+        </div>
+        <div class="card-footer">
+          <div class="card-info"><span class="card-name">Jerusalem Bank</span></div>
+          <span class="card-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 10.5L10.5 2.5M10.5 2.5H5M10.5 2.5V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+      </a>	  
+
+      <a href="#" class="card c1 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">05</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 5</span></div></div></a>
+      <a href="#" class="card c2 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">06</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 6</span></div></div></a>
+      <a href="#" class="card c3 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">07</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 7</span></div></div></a>
+      <a href="#" class="card c4 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">08</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 8</span></div></div></a>
+      <a href="#" class="card c1 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">09</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 9</span></div></div></a>
+      <a href="#" class="card c2 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">10</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 10</span></div></div></a>
+    </div>
+  </div>
+
+  <!-- ── Section 3: Multi Tenant ── -->
+  <div class="section-block">
+    <div class="section-label">Multi Tenant</div>
+    <div class="grid">
+
+	<!-- c1101 -->
+	<a href="https://console.c1101.glassboxdigital.io/webinterface/login/"
+	class="card c2" target="_blank" rel="noopener">
+	<div class="card-bar"></div>
+	<div class="card-img">
+		<img class="img-dark"
+			src="https://www.glassbox.com/images/logos/glassbox-logo-dark.svg"
+			alt="GB Demo dark">
+		<img class="img-light"
+			src="https://www.glassbox.com/images/logos/glassbox-logo-dark.svg"
+			alt="GB Demo light">
+		<span class="initials" style="display:none">GB</span>
+	</div>
+	<div class="card-footer">
+		<div class="card-info">
+		<span class="card-name">C1101</span>
+		<span class="card-more">Cellcom &amp; Fattal</span>
+		</div>
+		<span class="card-arrow">
+		<svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<path d="M2.5 10.5L10.5 2.5M10.5 2.5H5M10.5 2.5V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+		</svg>
+		</span>
+	</div>
+	</a>
+
+
+
+      <a href="#" class="card c3 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">11</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 11</span></div></div></a>
+      <a href="#" class="card c4 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">12</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 12</span></div></div></a>
+      <a href="#" class="card c1 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">13</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 13</span></div></div></a>
+      <a href="#" class="card c2 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">14</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 14</span></div></div></a>
+      <a href="#" class="card c3 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">15</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 15</span></div></div></a>
+      <a href="#" class="card c4 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">16</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 16</span></div></div></a>
+      <a href="#" class="card c1 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">17</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 17</span></div></div></a>
+      <a href="#" class="card c2 placeholder"><div class="card-bar"></div><div class="card-img"><span class="initials">18</span></div><div class="card-footer"><div class="card-info"><span class="card-name">Link 18</span></div></div></a>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <span>Created By Shay Danny 1.0.0</span>
+  <span>Glassbox Console — Internal Dashboard </span>
+  <span id="ts"></span>
+</footer>
+
+<script>
+  /* Clock */
+  const ts = document.getElementById('ts');
+  const tick = () => ts.textContent = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  tick(); setInterval(tick, 60000);
+
+  /* Theme */
+  const root = document.documentElement;
+  const saved = localStorage.getItem('gb-theme') || 'dark';
+  root.setAttribute('data-theme', saved);
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('gb-theme', next);
+  });
+</script>
+</body>
+</html>
