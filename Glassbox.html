@@ -4,43 +4,36 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Glassbox Console</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Brand accents */
-  --a-violet:  #7c5cfc;
-  --a-indigo:  #4f6ef7;
-  --a-pink:    #f25a97;
-  --a-orange:  #f0892a;
-  --a-sky:     #38b6ff;
-  --a-teal:    #1fc8a4;
-  --a-amber:   #f5a623;
-  --a-rose:    #f74f6e;
+  --a-violet: #7c5cfc;
+  --a-indigo: #4f6ef7;
+  --a-pink:   #f25a97;
+  --a-orange: #f0892a;
+  --a-sky:    #38b6ff;
+  --a-teal:   #1fc8a4;
+  --a-amber:  #f5a623;
+  --a-rose:   #f74f6e;
 }
-
 :root[data-theme="dark"] {
   --bg:           #080a10;
-  --bg2:          #0d1018;
   --surface:      #111520;
   --surface2:     #181c2a;
   --surface3:     #1f2438;
-  --border:       rgba(255,255,255,0.06);
-  --border-h:     rgba(255,255,255,0.14);
-  --text:         #e8eaf5;
+  --border:       rgba(255,255,255,0.07);
+  --border-h:     rgba(255,255,255,0.15);
+  --text:         #eaecf8;
   --text-sub:     #8b91b0;
   --text-dim:     #454d6b;
-  --glow:         rgba(124,92,252,0.18);
-  --header-bg:    rgba(8,10,16,0.88);
-  --shadow-card:  0 8px 32px rgba(0,0,0,0.45);
-  --shadow-hover: 0 20px 60px rgba(0,0,0,0.6);
+  --header-bg:    rgba(8,10,16,0.90);
+  --shadow-hover: 0 20px 60px rgba(0,0,0,0.55);
   --kbd-bg:       #1f2438;
 }
-
 :root[data-theme="light"] {
   --bg:           #f0f2fa;
-  --bg2:          #e8eaf5;
   --surface:      #ffffff;
   --surface2:     #f4f5fb;
   --surface3:     #eaecf7;
@@ -49,128 +42,110 @@
   --text:         #0d1020;
   --text-sub:     #5b6380;
   --text-dim:     #9ca3bf;
-  --glow:         rgba(124,92,252,0.08);
-  --header-bg:    rgba(240,242,250,0.9);
-  --shadow-card:  0 4px 20px rgba(0,0,0,0.08);
+  --header-bg:    rgba(240,242,250,0.92);
   --shadow-hover: 0 16px 48px rgba(0,0,0,0.14);
   --kbd-bg:       #e8eaf5;
 }
 
-/* ── LAYOUT ── */
 body {
   min-height: 100vh;
   background: var(--bg);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
   color: var(--text);
   display: flex; flex-direction: column;
   transition: background .3s, color .3s;
   overflow-x: hidden;
 }
-
-/* ambient glow orbs */
 body::before, body::after {
-  content: '';
-  position: fixed; pointer-events: none; z-index: 0;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: .35;
+  content: ''; position: fixed; pointer-events: none; z-index: 0;
+  border-radius: 50%; filter: blur(130px); opacity: .28;
 }
-body::before {
-  width: 600px; height: 600px;
-  background: var(--a-violet);
-  top: -200px; left: -200px;
-}
-body::after {
-  width: 500px; height: 500px;
-  background: var(--a-indigo);
-  bottom: -100px; right: -100px;
-}
+body::before { width: 640px; height: 640px; background: var(--a-violet); top: -220px; left: -220px; }
+body::after  { width: 520px; height: 520px; background: var(--a-indigo); bottom: -120px; right: -120px; }
 [data-theme="light"] body::before,
 [data-theme="light"] body::after { opacity: .06; }
 
 /* ── HEADER ── */
 header {
   position: sticky; top: 0; z-index: 100;
-  padding: 0 40px;
-  height: 60px;
+  height: 62px;
+  padding: 0 32px;
   background: var(--header-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 16px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
   transition: background .3s, border-color .3s;
 }
 
+/* left: logo */
 .logo {
   display: flex; align-items: center; gap: 10px;
-  text-decoration: none; flex-shrink: 0;
+  text-decoration: none; justify-self: start;
 }
 .logo-icon {
   width: 34px; height: 34px; border-radius: 9px;
   background: linear-gradient(135deg, var(--a-violet), var(--a-indigo));
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 0 1px rgba(124,92,252,.4), 0 4px 12px rgba(124,92,252,.35);
+  box-shadow: 0 0 0 1px rgba(124,92,252,.35), 0 4px 14px rgba(124,92,252,.3);
+  flex-shrink: 0;
 }
 .logo-icon svg { width: 17px; height: 17px; }
-.logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: -0.02em; }
+.logo-text {
+  font-size: 15px; font-weight: 700; letter-spacing: -0.02em;
+  white-space: nowrap;
+}
 
-/* search */
+/* center: search */
 .search-wrap {
-  flex: 1; max-width: 340px;
+  width: 320px;
   display: flex; align-items: center; gap: 8px;
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 9px;
+  border-radius: 10px;
   padding: 0 12px;
   transition: border-color .2s, box-shadow .2s;
 }
 .search-wrap:focus-within {
   border-color: var(--a-violet);
-  box-shadow: 0 0 0 3px rgba(124,92,252,.15);
+  box-shadow: 0 0 0 3px rgba(124,92,252,.14);
 }
-.search-wrap svg { color: var(--text-dim); flex-shrink: 0; }
+.search-icon { color: var(--text-dim); flex-shrink: 0; display: flex; }
 #search {
   flex: 1; background: none; border: none; outline: none;
-  font: inherit; font-size: 13px; color: var(--text);
-  padding: 8px 0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px; font-weight: 400;
+  color: var(--text);
+  padding: 9px 0;
 }
 #search::placeholder { color: var(--text-dim); }
-.search-kbd {
-  font-size: 10px; font-weight: 600;
-  color: var(--text-dim);
-  background: var(--kbd-bg);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 2px 6px;
-  letter-spacing: .04em;
-  flex-shrink: 0;
+
+/* right: actions */
+.header-right {
+  display: flex; align-items: center; gap: 10px;
+  justify-self: end;
 }
-
-.header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
-
-/* pill stats */
 .stat-pill {
-  font-size: 11px; font-weight: 600; letter-spacing: .03em;
+  font-size: 11.5px; font-weight: 500;
   color: var(--text-sub);
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 4px 12px;
-  display: flex; align-items: center; gap: 5px;
+  display: flex; align-items: center; gap: 6px;
   white-space: nowrap;
 }
 .stat-pill .dot {
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--a-teal);
-  box-shadow: 0 0 6px var(--a-teal);
-  flex-shrink: 0;
+  box-shadow: 0 0 7px var(--a-teal);
 }
-
-/* theme toggle */
 .toggle-btn {
   width: 36px; height: 36px; border-radius: 9px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  background: var(--surface2); border: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; font-size: 15px;
   transition: background .2s, border-color .2s, transform .15s;
@@ -191,26 +166,25 @@ main {
 }
 .no-results.visible { display: flex; }
 .no-results svg { color: var(--text-dim); }
-.no-results h3 { font-size: 17px; font-weight: 700; }
+.no-results h3 { font-size: 17px; font-weight: 600; }
 .no-results p { font-size: 13px; color: var(--text-sub); }
 
 /* ── SECTION ── */
 .section { margin-bottom: 44px; }
 .section-header {
-  display: flex; align-items: center; gap: 12px;
+  display: flex; align-items: center; gap: 10px;
   margin-bottom: 18px; cursor: pointer; user-select: none;
 }
 .section-header:hover .section-toggle { border-color: var(--border-h); }
 .section-eyebrow {
-  font-size: 10px; font-weight: 700; letter-spacing: .14em;
+  font-size: 10px; font-weight: 700; letter-spacing: .13em;
   text-transform: uppercase; color: var(--text-dim);
 }
 .section-name {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 18px; font-weight: 700; letter-spacing: -.03em;
+  font-size: 17px; font-weight: 700; letter-spacing: -.02em;
 }
 .section-count {
-  font-size: 11px; font-weight: 700;
+  font-size: 11px; font-weight: 600;
   color: var(--text-sub);
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -220,15 +194,29 @@ main {
 .section-toggle {
   margin-left: auto;
   width: 26px; height: 26px; border-radius: 7px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  background: var(--surface2); border: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
   color: var(--text-dim);
-  transition: border-color .2s, transform .25s;
+  transition: border-color .2s, transform .28s cubic-bezier(.4,0,.2,1);
 }
 .section.collapsed .section-toggle { transform: rotate(-90deg); }
-.section-body { transition: opacity .25s; }
 .section.collapsed .section-body { display: none; }
+
+/* recently-visited section */
+#sec-recent { display: none; }
+#sec-recent.has-items { display: block; }
+.clear-recent {
+  margin-left: 6px;
+  font-size: 11px; font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: none;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.clear-recent:hover { color: var(--a-rose); border-color: var(--a-rose); background: rgba(247,79,110,.07); }
 
 /* ── GRID ── */
 .grid {
@@ -253,88 +241,76 @@ main {
               border-color .22s ease;
 }
 .card:hover {
-  transform: translateY(-5px) scale(1.012);
+  transform: translateY(-5px) scale(1.013);
   box-shadow: var(--shadow-hover);
   border-color: var(--border-h);
 }
-/* animated gradient border on hover */
 .card::before {
-  content: '';
-  position: absolute; inset: 0; border-radius: 16px; z-index: 0;
-  background: linear-gradient(135deg, var(--card-color, var(--a-violet)), transparent 60%);
-  opacity: 0;
-  transition: opacity .3s;
-  pointer-events: none;
+  content: ''; position: absolute; inset: 0; border-radius: 16px; z-index: 0;
+  background: linear-gradient(135deg, var(--card-color, var(--a-violet)), transparent 55%);
+  opacity: 0; transition: opacity .3s; pointer-events: none;
 }
-.card:hover::before { opacity: .09; }
+.card:hover::before { opacity: .08; }
 
-/* accent bar */
 .card-bar {
   height: 3px; width: 100%; flex-shrink: 0;
-  background: linear-gradient(90deg, var(--card-color, var(--a-violet)), color-mix(in srgb, var(--card-color, var(--a-violet)) 60%, transparent));
+  background: linear-gradient(90deg, var(--card-color, var(--a-violet)), color-mix(in srgb, var(--card-color, var(--a-violet)) 40%, transparent));
   position: relative; z-index: 1;
 }
-
-/* logo area */
 .card-img {
-  flex: 1; position: relative;
+  flex: 1; position: relative; overflow: hidden;
   background: var(--surface2);
   display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
 }
 .card-img img {
-  max-width: 70%; max-height: 55%;
+  max-width: 68%; max-height: 52%;
   object-fit: contain;
   transition: transform .3s ease;
   position: relative; z-index: 1;
 }
-.card:hover .card-img img { transform: scale(1.07); }
+.card:hover .card-img img { transform: scale(1.08); }
 
-/* dual-theme images */
 .img-dark  { display: block; }
 .img-light { display: none; }
 [data-theme="light"] .img-dark  { display: none; }
 [data-theme="light"] .img-light { display: block; }
 
-/* fallback monogram */
 .monogram {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 42px; font-weight: 800; letter-spacing: -.05em;
+  font-size: 44px; font-weight: 700; letter-spacing: -.05em;
   color: var(--card-color, var(--a-violet));
-  opacity: .2;
-  position: relative; z-index: 1;
+  opacity: .18; position: relative; z-index: 1;
+  font-family: 'DM Sans', sans-serif;
 }
-
-/* footer */
 .card-foot {
   padding: 12px 14px 14px;
   border-top: 1px solid var(--border);
   background: var(--surface);
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 8px;
-  flex-shrink: 0;
-  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  flex-shrink: 0; position: relative; z-index: 1;
   transition: background .3s;
 }
 .card-name {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 16px; font-weight: 700; letter-spacing: -.03em;
+  font-size: 15.5px; font-weight: 700; letter-spacing: -.02em;
   color: var(--text); line-height: 1.2;
 }
 .card-sub {
-  font-size: 10px; font-weight: 500; color: var(--text-sub);
-  margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 10.5px; font-weight: 500; color: var(--text-sub);
+  margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   max-width: 130px;
 }
+/* recent timestamp */
+.card-ts {
+  font-size: 10px; font-weight: 400; color: var(--text-dim);
+  font-family: 'DM Mono', monospace;
+  margin-top: 2px;
+}
 .card-arrow {
-  width: 28px; height: 28px; flex-shrink: 0;
-  border-radius: 8px;
+  width: 28px; height: 28px; flex-shrink: 0; border-radius: 8px;
   border: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
   color: var(--text-sub);
-  opacity: 0;
-  transform: translateX(-4px) translateY(4px);
-  transition: opacity .18s, transform .18s, background .18s, border-color .18s;
+  opacity: 0; transform: translateX(-4px) translateY(4px);
+  transition: opacity .18s, transform .18s, background .18s, border-color .18s, color .18s;
 }
 .card:hover .card-arrow {
   opacity: 1; transform: none;
@@ -343,7 +319,7 @@ main {
   color: var(--card-color, var(--a-violet));
 }
 
-/* color classes */
+/* color accents */
 .c-violet { --card-color: var(--a-violet); }
 .c-indigo { --card-color: var(--a-indigo); }
 .c-pink   { --card-color: var(--a-pink);   }
@@ -353,46 +329,36 @@ main {
 .c-amber  { --card-color: var(--a-amber);  }
 .c-rose   { --card-color: var(--a-rose);   }
 
-/* add card */
-.card-add {
-  border-style: dashed;
-  border-color: var(--border);
-  background: transparent;
-  opacity: 0;
-  pointer-events: none;
-}
-
 /* ── FOOTER ── */
 footer {
   position: relative; z-index: 1;
   padding: 14px 40px;
   border-top: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  font-size: 11px; color: var(--text-dim); font-weight: 500;
+  font-size: 11.5px; color: var(--text-dim); font-weight: 400;
   transition: border-color .3s;
 }
-.footer-center { color: var(--text-sub); }
+.footer-mid { color: var(--text-sub); }
 
 /* ── RESPONSIVE ── */
-@media (max-width: 768px) {
-  header { padding: 0 16px; gap: 10px; }
+@media (max-width: 800px) {
+  header { padding: 0 16px; grid-template-columns: auto 1fr auto; }
+  .search-wrap { width: auto; }
+  .logo-text { display: none; }
   main { padding: 24px 16px; }
   footer { padding: 12px 16px; flex-direction: column; gap: 4px; text-align: center; }
-  .search-wrap { max-width: none; }
   .stat-pill { display: none; }
-  .search-kbd { display: none; }
 }
 @media (max-width: 480px) {
   .grid { grid-template-columns: repeat(2, 1fr); }
+  header { grid-template-columns: auto 1fr auto; }
 }
-
-/* highlight match */
-.hl { background: rgba(124,92,252,.35); border-radius: 2px; }
 </style>
 </head>
 <body>
 
 <header>
+  <!-- LEFT: Logo -->
   <a class="logo" href="#">
     <div class="logo-icon">
       <svg viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -405,12 +371,15 @@ footer {
     <span class="logo-text">Glassbox Console</span>
   </a>
 
+  <!-- CENTER: Search -->
   <div class="search-wrap">
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <span class="search-icon">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </span>
     <input id="search" type="search" placeholder="Search environments…" autocomplete="off" spellcheck="false">
-    <span class="search-kbd">⌘ K</span>
   </div>
 
+  <!-- RIGHT: Actions -->
   <div class="header-right">
     <div class="stat-pill"><span class="dot"></span><span id="activeCount">0</span> environments</div>
     <button class="toggle-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">
@@ -420,6 +389,24 @@ footer {
 </header>
 
 <main id="main">
+  <!-- Recently visited — injected by JS -->
+  <section class="section" id="sec-recent" data-section>
+    <div class="section-header" data-toggle>
+      <div>
+        <div class="section-eyebrow">Auto-tracked</div>
+        <div class="section-name">Recently Visited</div>
+      </div>
+      <button class="clear-recent" id="clearRecent" title="Clear history">Clear</button>
+      <span class="section-count" id="recentCount">0</span>
+      <span class="section-toggle">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </div>
+    <div class="section-body">
+      <div class="grid" id="recentGrid"></div>
+    </div>
+  </section>
+
   <div class="no-results" id="noResults">
     <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="18" cy="18" r="11" stroke="currentColor" stroke-width="2"/><path d="M26.5 26.5L35 35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13 18h10M18 13v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     <h3>No environments found</h3>
@@ -428,24 +415,21 @@ footer {
 </main>
 
 <footer>
-  <span>v2.0 — Glassbox Console</span>
-  <span class="footer-center">Internal Dashboard · Shay Danny</span>
+  <span>Glassbox Console v2.1</span>
+  <span class="footer-mid">Internal Dashboard · Shay Danny</span>
   <span id="clock"></span>
 </footer>
 
 <script>
-/* ═══════════════════════════════════════════
-   ██  CONFIGURATION  — Edit this to add/remove environments
-   ═══════════════════════════════════════════
-   Each entry: {
-     name:     string          — display name
-     sub:      string          — subtitle (optional)
-     url:      string          — link href
-     color:    string          — accent class: c-violet | c-indigo | c-pink | c-orange | c-sky | c-teal | c-amber | c-rose
-     logoDark: string          — logo URL for dark mode (optional)
-     logoLight:string          — logo URL for light mode (optional; falls back to logoDark)
-   }
- */
+/* ═══════════════════════════════════════════════════════
+   ██  CONFIGURATION
+   ═══════════════════════════════════════════════════════
+   To add a new environment:
+     1. Find the right section in SECTIONS below
+     2. Copy one { } item block and paste it in the items array
+     3. Fill in: name, url, color, logoDark
+   Available colors: c-violet · c-indigo · c-pink · c-orange · c-sky · c-teal · c-amber · c-rose
+*/
 
 const SECTIONS = [
   {
@@ -546,58 +530,60 @@ const SECTIONS = [
         logoDark:  'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg',
         logoLight: 'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg',
       },
-      /* ↓ ADD NEW ENVIRONMENTS HERE — copy one block and paste below */
+      /* ↓ ADD NEW ENVIRONMENTS HERE */
       // {
-      //   name: 'My New Customer',
-      //   sub: 'Optional subtitle',
+      //   name: 'New Customer',
+      //   sub: 'Optional note',
       //   url: 'https://consolegb.XXXX.glassboxdigital.io/webinterface/webui/glassbox-hub',
-      //   color: 'c-teal',           // pick from: c-violet c-indigo c-pink c-orange c-sky c-teal c-amber c-rose
-      //   logoDark: 'https://...',    // logo URL
+      //   color: 'c-teal',
+      //   logoDark: 'https://...',
       // },
     ],
   },
 ];
 
-/* ═══════════════════════════════════════════
-   ARROW SVG
- */
-const ARROW_SVG = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M2 10L10 2M10 2H4.5M10 2V7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
-const CHEVRON_SVG = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+/* ═══════════════════════════════════════════════════════
+   HELPERS
+*/
+const ARROW = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4.5M10 2V7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const CHEV  = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
-/* ═══════════════════════════════════════════
-   RENDER
- */
-function monogram(name) {
-  return name.replace(/[^A-Z0-9]/gi,'').slice(0,2).toUpperCase() || '??';
+function monogram(name) { return name.replace(/[^A-Z0-9]/gi,'').slice(0,2).toUpperCase() || '??'; }
+
+function timeAgo(ts) {
+  const diff = (Date.now() - ts) / 1000;
+  if (diff < 60)   return 'Just now';
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400)return Math.floor(diff/3600) + 'h ago';
+  return Math.floor(diff/86400) + 'd ago';
 }
 
-function buildCard(item) {
+function buildCard(item, tsLabel) {
   const hasDark  = item.logoDark  && item.logoDark.trim();
   const hasLight = item.logoLight && item.logoLight.trim();
   const sub = item.sub ? `<span class="card-sub">${item.sub}</span>` : '';
+  const ts  = tsLabel  ? `<span class="card-ts">${tsLabel}</span>` : '';
   const imgs = hasDark
-    ? `<img class="img-dark"  src="${item.logoDark}"  alt="${item.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling?.style.setProperty('display',this.classList.contains('img-dark')?'block':'none')">
+    ? `<img class="img-dark"  src="${item.logoDark}"  alt="${item.name}" loading="lazy" onerror="this.style.display='none'">
        <img class="img-light" src="${hasLight ? item.logoLight : item.logoDark}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'">`
     : `<span class="monogram">${monogram(item.name)}</span>`;
-
   return `
-<a href="${item.url}" class="card ${item.color}" target="_blank" rel="noopener" data-name="${item.name.toLowerCase()} ${(item.sub||'').toLowerCase()}">
+<a href="${item.url}" class="card ${item.color}" target="_blank" rel="noopener"
+   data-name="${item.name.toLowerCase()} ${(item.sub||'').toLowerCase()}"
+   data-url="${item.url}">
   <div class="card-bar"></div>
   <div class="card-img">${imgs}</div>
   <div class="card-foot">
     <div>
       <div class="card-name">${item.name}</div>
-      ${sub}
+      ${sub}${ts}
     </div>
-    <span class="card-arrow">${ARROW_SVG}</span>
+    <span class="card-arrow">${ARROW}</span>
   </div>
 </a>`;
 }
 
 function buildSection(sec) {
-  const cards = sec.items.map(buildCard).join('');
   return `
 <section class="section" id="sec-${sec.id}" data-section>
   <div class="section-header" data-toggle>
@@ -606,73 +592,123 @@ function buildSection(sec) {
       <div class="section-name">${sec.name}</div>
     </div>
     <span class="section-count">${sec.items.length}</span>
-    <span class="section-toggle">${CHEVRON_SVG}</span>
+    <span class="section-toggle">${CHEV}</span>
   </div>
   <div class="section-body">
-    <div class="grid">${cards}</div>
+    <div class="grid">${sec.items.map(i => buildCard(i)).join('')}</div>
   </div>
 </section>`;
 }
 
-const main = document.getElementById('main');
-const frag = SECTIONS.map(buildSection).join('');
-main.insertAdjacentHTML('afterbegin', frag);
+/* ── Render sections ── */
+const mainEl = document.getElementById('main');
+mainEl.insertAdjacentHTML('beforeend', SECTIONS.map(buildSection).join(''));
 
-/* ═══════════════════════════════════════════
-   STATS
- */
-const totalActive = SECTIONS.reduce((a,s) => a + s.items.length, 0);
-document.getElementById('activeCount').textContent = totalActive;
+document.getElementById('activeCount').textContent =
+  SECTIONS.reduce((a,s) => a + s.items.length, 0);
 
-/* ═══════════════════════════════════════════
-   COLLAPSE
- */
-document.querySelectorAll('[data-toggle]').forEach(hdr => {
-  hdr.addEventListener('click', () => {
-    hdr.closest('[data-section]').classList.toggle('collapsed');
+/* ═══════════════════════════════════════════════════════
+   RECENTLY VISITED  (localStorage key: gb-recent)
+*/
+const RECENT_KEY = 'gb-recent';
+const MAX_RECENT = 6;
+
+// Flat map of all items by URL for quick lookup
+const ALL_ITEMS = {};
+SECTIONS.forEach(s => s.items.forEach(i => { ALL_ITEMS[i.url] = i; }));
+
+function loadRecent() {
+  try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch { return []; }
+}
+function saveRecent(arr) {
+  localStorage.setItem(RECENT_KEY, JSON.stringify(arr));
+}
+function renderRecent() {
+  const entries = loadRecent(); // [{url, ts}]
+  const secEl  = document.getElementById('sec-recent');
+  const grid   = document.getElementById('recentGrid');
+  const count  = document.getElementById('recentCount');
+
+  if (!entries.length) { secEl.classList.remove('has-items'); return; }
+
+  grid.innerHTML = entries.map(e => {
+    const item = ALL_ITEMS[e.url];
+    if (!item) return '';
+    return buildCard(item, timeAgo(e.ts));
+  }).filter(Boolean).join('');
+
+  // Re-attach click listeners for the recent cards
+  attachClickListeners(grid);
+
+  count.textContent = entries.filter(e => ALL_ITEMS[e.url]).length;
+  secEl.classList.add('has-items');
+}
+
+function recordVisit(url) {
+  if (!ALL_ITEMS[url]) return;
+  let arr = loadRecent().filter(e => e.url !== url);
+  arr.unshift({ url, ts: Date.now() });
+  arr = arr.slice(0, MAX_RECENT);
+  saveRecent(arr);
+}
+
+function attachClickListeners(container) {
+  container.querySelectorAll('.card[data-url]').forEach(card => {
+    card.addEventListener('click', () => recordVisit(card.dataset.url));
   });
+}
+
+// Attach to all main cards
+attachClickListeners(mainEl);
+
+// Clear button
+document.getElementById('clearRecent').addEventListener('click', e => {
+  e.stopPropagation();
+  saveRecent([]);
+  renderRecent();
 });
 
-/* ═══════════════════════════════════════════
+renderRecent();
+
+/* ═══════════════════════════════════════════════════════
+   COLLAPSE
+*/
+document.querySelectorAll('[data-toggle]').forEach(hdr => {
+  hdr.addEventListener('click', () => hdr.closest('[data-section]').classList.toggle('collapsed'));
+});
+
+/* ═══════════════════════════════════════════════════════
    SEARCH
- */
-const searchEl = document.getElementById('search');
+*/
+const searchEl  = document.getElementById('search');
 const noResults = document.getElementById('noResults');
 
 function runSearch(q) {
   q = q.toLowerCase().trim();
-  let totalVisible = 0;
-
+  let total = 0;
   document.querySelectorAll('[data-section]').forEach(sec => {
-    let secVisible = 0;
+    if (sec.id === 'sec-recent') return; // always show recent
+    let vis = 0;
     sec.querySelectorAll('.card').forEach(card => {
-      const haystack = card.dataset.name || '';
-      const match = !q || haystack.includes(q);
+      const match = !q || (card.dataset.name||'').includes(q);
       card.style.display = match ? '' : 'none';
-      if (match) secVisible++;
+      if (match) vis++;
     });
-    sec.style.display = secVisible === 0 ? 'none' : '';
-    totalVisible += secVisible;
+    sec.style.display = vis === 0 ? 'none' : '';
+    total += vis;
   });
-
-  noResults.classList.toggle('visible', totalVisible === 0 && q !== '');
+  noResults.classList.toggle('visible', total === 0 && q !== '');
 }
 
 searchEl.addEventListener('input', e => runSearch(e.target.value));
-
-/* ⌘K / Ctrl+K to focus search */
 document.addEventListener('keydown', e => {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-    e.preventDefault(); searchEl.focus(); searchEl.select();
-  }
-  if (e.key === 'Escape' && document.activeElement === searchEl) {
-    searchEl.value = ''; runSearch(''); searchEl.blur();
-  }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); searchEl.focus(); searchEl.select(); }
+  if (e.key === 'Escape' && document.activeElement === searchEl) { searchEl.value = ''; runSearch(''); searchEl.blur(); }
 });
 
-/* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════
    THEME
- */
+*/
 const root = document.documentElement;
 const themeIcon = document.getElementById('themeIcon');
 function applyTheme(t) {
@@ -681,15 +717,15 @@ function applyTheme(t) {
   localStorage.setItem('gb-theme', t);
 }
 applyTheme(localStorage.getItem('gb-theme') || 'dark');
-document.getElementById('themeBtn').addEventListener('click', () => {
-  applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-});
+document.getElementById('themeBtn').addEventListener('click', () =>
+  applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+);
 
-/* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════
    CLOCK
- */
+*/
 const clockEl = document.getElementById('clock');
-const tick = () => clockEl.textContent = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+const tick = () => clockEl.textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 tick(); setInterval(tick, 30000);
 </script>
 </body>
