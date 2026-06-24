@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glassbox Console</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+   --a-violet:    #7c5cfc;
+   --a-indigo:    #4f6ef7;
+   --a-pink:      #f25a97;
+   --a-orange:    #f0892a;
+   --a-sky:       #38b6ff;
+   --a-teal:      #1fc8a4;
+   --a-amber:     #f5a623;
+   --a-rose:      #f74f6e;
+   --a-lime:      #84cc16;
+   --a-emerald:   #10b981;
+   --a-cyan:      #06b6d4;
+   --a-blue:      #3b82f6;
+   --a-purple:    #8b5cf6;
+   --a-fuchsia:   #d946ef;
+   --a-red:       #ef4444;
+   --a-crimson:   #dc2626;
+   --a-yellow:    #eab308;
+   --a-gold:      #fbbf24;
+   --a-green:     #22c55e;
+   --a-mint:      #34d399;
+   --a-aqua:      #2dd4bf;
+   --a-cobalt:    #2563eb;
+   --a-plum:      #9333ea;
+   --a-magenta:   #ec4899;
+}
+:root[data-theme="dark"] {
+  --bg:           #080a10;
+  --surface:      #111520;
+  --surface2:     #181c2a;
+  --surface3:     #1f2438;
+  --border:       rgba(255,255,255,0.07);
+  --border-h:     rgba(255,255,255,0.15);
+  --text:         #eaecf8;
+  --text-sub:     #8b91b0;
+  --text-dim:     #454d6b;
+  --header-bg:    rgba(8,10,16,0.90);
+  --shadow-hover: 0 20px 60px rgba(0,0,0,0.55);
+  --kbd-bg:       #1f2438;
+}
+:root[data-theme="light"] {
+  --bg:           #f0f2fa;
+  --surface:      #ffffff;
+  --surface2:     #f4f5fb;
+  --surface3:     #eaecf7;
+  --border:       rgba(0,0,0,0.07);
+  --border-h:     rgba(0,0,0,0.16);
+  --text:         #0d1020;
+  --text-sub:     #5b6380;
+  --text-dim:     #9ca3bf;
+  --header-bg:    rgba(240,242,250,0.92);
+  --shadow-hover: 0 16px 48px rgba(0,0,0,0.14);
+  --kbd-bg:       #e8eaf5;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  color: var(--text);
+  display: flex; flex-direction: column;
+  transition: background .3s, color .3s;
+  overflow-x: hidden;
+}
+body::before, body::after {
+  content: ''; position: fixed; pointer-events: none; z-index: 0;
+  border-radius: 50%; filter: blur(130px); opacity: .28;
+}
+body::before { width: 640px; height: 640px; background: var(--a-violet); top: -220px; left: -220px; }
+body::after  { width: 520px; height: 520px; background: var(--a-indigo); bottom: -120px; right: -120px; }
+[data-theme="light"] body::before,
+[data-theme="light"] body::after { opacity: .06; }
+
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  height: 62px;
+  padding: 0 32px;
+  background: var(--header-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  transition: background .3s, border-color .3s;
+}
+
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none; justify-self: start;
+}
+.logo-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--a-violet), var(--a-indigo));
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 1px rgba(124,92,252,.35), 0 4px 14px rgba(124,92,252,.3);
+  flex-shrink: 0;
+}
+.logo-icon svg { width: 17px; height: 17px; }
+.logo-text {
+  font-size: 15px; font-weight: 700; letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.search-wrap {
+  width: 320px;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0 12px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.search-wrap:focus-within {
+  border-color: var(--a-violet);
+  box-shadow: 0 0 0 3px rgba(124,92,252,.14);
+}
+.search-icon { color: var(--text-dim); flex-shrink: 0; display: flex; }
+#search {
+  flex: 1; background: none; border: none; outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px; font-weight: 400;
+  color: var(--text);
+  padding: 9px 0;
+}
+#search::placeholder { color: var(--text-dim); }
+
+.header-right {
+  display: flex; align-items: center; gap: 10px;
+  justify-self: end;
+}
+.stat-pill {
+  font-size: 11.5px; font-weight: 500;
+  color: var(--text-sub);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 12px;
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+}
+.stat-pill .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--a-teal);
+  box-shadow: 0 0 7px var(--a-teal);
+}
+.toggle-btn {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 15px;
+  transition: background .2s, border-color .2s, transform .15s;
+}
+.toggle-btn:hover { background: var(--surface3); border-color: var(--border-h); transform: scale(1.07); }
+
+/* ── USEFUL LINKS BUTTON ── */
+.links-btn-wrap { position: relative; }
+.links-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 14px;
+  font-size: 12px; font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--a-violet);
+  background: rgba(124,92,252,.1);
+  border: 1px solid rgba(124,92,252,.28);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, transform .15s;
+  white-space: nowrap;
+}
+.links-btn:hover { background: rgba(124,92,252,.18); border-color: rgba(124,92,252,.5); transform: scale(1.03); }
+.links-btn svg { flex-shrink: 0; }
+
+/* ── LINKS DROPDOWN ── */
+.links-dropdown {
+  position: absolute; top: calc(100% + 10px); right: 0;
+  width: 300px;
+  background: var(--surface);
+  border: 1px solid var(--border-h);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(124,92,252,.12);
+  overflow: hidden;
+  opacity: 0; pointer-events: none; transform: translateY(-8px) scale(.97);
+  transition: opacity .22s ease, transform .22s cubic-bezier(.34,1.3,.64,1);
+  z-index: 200;
+}
+.links-dropdown.open { opacity: 1; pointer-events: all; transform: none; }
+
+.links-dropdown-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.links-dropdown-header span {
+  font-size: 11px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--text-dim);
+}
+.links-list { padding: 8px; }
+.link-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 10px;
+  border-radius: 9px;
+  text-decoration: none;
+  transition: background .15s;
+  cursor: pointer;
+}
+.link-item:hover { background: var(--surface2); }
+.link-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 15px;
+}
+.link-info { flex: 1; min-width: 0; }
+.link-name {
+  font-size: 13px; font-weight: 600;
+  color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.link-desc {
+  font-size: 11px; color: var(--text-sub);
+  margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.link-arrow {
+  color: var(--text-dim); flex-shrink: 0; font-size: 12px;
+  opacity: 0; transition: opacity .15s;
+}
+.link-item:hover .link-arrow { opacity: 1; }
+
+/* ── MAIN ── */
+main {
+  flex: 1; position: relative; z-index: 1;
+  padding: 36px 40px;
+  max-width: 1500px; width: 100%; margin: 0 auto;
+}
+
+.no-results {
+  display: none; flex-direction: column; align-items: center;
+  gap: 12px; padding: 80px 20px; text-align: center;
+}
+.no-results.visible { display: flex; }
+.no-results svg { color: var(--text-dim); }
+.no-results h3 { font-size: 17px; font-weight: 600; }
+.no-results p { font-size: 13px; color: var(--text-sub); }
+
+/* ── SECTION ── */
+.section { margin-bottom: 44px; }
+.section-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 18px; cursor: pointer; user-select: none;
+}
+.section-header:hover .section-toggle { border-color: var(--border-h); }
+.section-eyebrow {
+  font-size: 10px; font-weight: 700; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--text-dim);
+}
+.section-name {
+  font-size: 17px; font-weight: 700; letter-spacing: -.02em;
+}
+.section-count {
+  font-size: 11px; font-weight: 600;
+  color: var(--text-sub);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+.section-toggle {
+  margin-left: auto;
+  width: 26px; height: 26px; border-radius: 7px;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-dim);
+  transition: border-color .2s, transform .28s cubic-bezier(.4,0,.2,1);
+}
+.section.collapsed .section-toggle { transform: rotate(-90deg); }
+.section.collapsed .section-body { display: none; }
+
+#sec-recent { display: none; }
+#sec-recent.has-items { display: block; }
+.clear-recent {
+  margin-left: 6px;
+  font-size: 11px; font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: none;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.clear-recent:hover { color: var(--a-rose); border-color: var(--a-rose); background: rgba(247,79,110,.07); }
+
+/* ── GRID ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+/* ── CARD ── */
+.card {
+  position: relative;
+  display: flex; flex-direction: column;
+  height: 200px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .22s cubic-bezier(.34,1.3,.64,1),
+              box-shadow .22s ease,
+              border-color .22s ease;
+}
+.card:hover {
+  transform: translateY(-5px) scale(1.013);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--border-h);
+}
+.card::before {
+  content: ''; position: absolute; inset: 0; border-radius: 16px; z-index: 0;
+  background: linear-gradient(135deg, var(--card-color, var(--a-violet)), transparent 55%);
+  opacity: 0; transition: opacity .3s; pointer-events: none;
+}
+.card:hover::before { opacity: .08; }
+
+.card-bar {
+  height: 3px; width: 100%; flex-shrink: 0;
+  background: linear-gradient(90deg, var(--card-color, var(--a-violet)), color-mix(in srgb, var(--card-color, var(--a-violet)) 40%, transparent));
+  position: relative; z-index: 1;
+}
+.card-img {
+  flex: 1; position: relative; overflow: hidden;
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+}
+.card-img img {
+  max-width: 68%; max-height: 52%;
+  object-fit: contain;
+  transition: transform .3s ease;
+  position: relative; z-index: 1;
+}
+.card:hover .card-img img { transform: scale(1.08); }
+
+.img-dark  { display: block; }
+.img-light { display: none; }
+[data-theme="light"] .img-dark  { display: none; }
+[data-theme="light"] .img-light { display: block; }
+
+.monogram {
+  font-size: 44px; font-weight: 700; letter-spacing: -.05em;
+  color: var(--card-color, var(--a-violet));
+  opacity: .18; position: relative; z-index: 1;
+  font-family: 'DM Sans', sans-serif;
+}
+.card-foot {
+  padding: 10px 12px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  flex-shrink: 0; position: relative; z-index: 1;
+  transition: background .3s;
+  min-height: 0;
+}
+.card-foot-text { flex: 1; min-width: 0; overflow: hidden; }
+.card-name {
+  font-size: 13px; font-weight: 700; letter-spacing: -.01em;
+  color: var(--text); line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.card-sub {
+  font-size: 10px; font-weight: 500; color: var(--text-sub);
+  margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
+}
+.card-ts {
+  font-size: 10px; font-weight: 400; color: var(--text-dim);
+  font-family: 'DM Mono', monospace;
+  margin-top: 2px;
+}
+.card-arrow {
+  width: 28px; height: 28px; flex-shrink: 0; border-radius: 8px;
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-sub);
+  opacity: 0; transform: translateX(-4px) translateY(4px);
+  transition: opacity .18s, transform .18s, background .18s, border-color .18s, color .18s;
+}
+.card:hover .card-arrow {
+  opacity: 1; transform: none;
+  background: var(--surface3);
+  border-color: var(--card-color, var(--a-violet));
+  color: var(--card-color, var(--a-violet));
+}
+
+/* ── MULTI-TENANT TICKER WRAPPER ── */
+.multitenant-wrap {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+}
+.multitenant-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+.ticker-panel {
+  width: 220px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+}
+.ticker-header {
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 7px;
+  flex-shrink: 0;
+}
+.ticker-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--a-teal);
+  box-shadow: 0 0 6px var(--a-teal);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .4; }
+}
+.ticker-title {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--text-dim);
+}
+.ticker-body {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+.ticker-track {
+  display: flex;
+  flex-direction: column;
+  transition: transform .7s cubic-bezier(.4,0,.2,1);
+}
+.ticker-msg {
+  padding: 12px 14px;
+  font-size: 12px; line-height: 1.55;
+  color: var(--text-sub);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.ticker-msg strong {
+  display: block;
+  font-size: 11px; font-weight: 700;
+  color: var(--a-violet);
+  margin-bottom: 3px;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.ticker-msg em {
+  font-style: normal;
+  color: var(--a-teal);
+  font-weight: 600;
+}
+.ticker-msg .tag {
+  display: inline-block;
+  font-size: 10px; font-weight: 600;
+  padding: 1px 7px; border-radius: 999px;
+  margin-top: 5px;
+}
+.tag-info    { background: rgba(56,182,255,.12); color: var(--a-sky);    border: 1px solid rgba(56,182,255,.25); }
+.tag-warn    { background: rgba(245,166,35,.12); color: var(--a-amber);  border: 1px solid rgba(245,166,35,.25); }
+.tag-ok      { background: rgba(31,200,164,.12); color: var(--a-teal);   border: 1px solid rgba(31,200,164,.25); }
+.tag-hot     { background: rgba(242,90,151,.12); color: var(--a-pink);   border: 1px solid rgba(242,90,151,.25); }
+
+/* color accents */
+.c-violet  { --card-color: var(--a-violet);  }
+.c-indigo  { --card-color: var(--a-indigo);  }
+.c-pink    { --card-color: var(--a-pink);    }
+.c-orange  { --card-color: var(--a-orange);  }
+.c-sky     { --card-color: var(--a-sky);     }
+.c-teal    { --card-color: var(--a-teal);    }
+.c-amber   { --card-color: var(--a-amber);   }
+.c-rose    { --card-color: var(--a-rose);    }
+.c-lime    { --card-color: var(--a-lime);    }
+.c-emerald { --card-color: var(--a-emerald); }
+.c-cyan    { --card-color: var(--a-cyan);    }
+.c-blue    { --card-color: var(--a-blue);    }
+.c-purple  { --card-color: var(--a-purple);  }
+.c-fuchsia { --card-color: var(--a-fuchsia); }
+.c-red     { --card-color: var(--a-red);     }
+.c-crimson { --card-color: var(--a-crimson); }
+.c-yellow  { --card-color: var(--a-yellow);  }
+.c-gold    { --card-color: var(--a-gold);    }
+.c-green   { --card-color: var(--a-green);   }
+.c-mint    { --card-color: var(--a-mint);    }
+.c-aqua    { --card-color: var(--a-aqua);    }
+.c-cobalt  { --card-color: var(--a-cobalt);  }
+.c-plum    { --card-color: var(--a-plum);    }
+.c-magenta { --card-color: var(--a-magenta); }
+
+/* ── FOOTER ── */
+footer {
+  position: relative; z-index: 1;
+  padding: 14px 40px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  font-size: 11.5px; color: var(--text-dim); font-weight: 400;
+  transition: border-color .3s;
+}
+.footer-mid { color: var(--text-sub); }
+
+@media (max-width: 800px) {
+  header { padding: 0 16px; grid-template-columns: auto 1fr auto; }
+  .search-wrap { width: auto; }
+  .logo-text { display: none; }
+  main { padding: 24px 16px; }
+  footer { padding: 12px 16px; flex-direction: column; gap: 4px; text-align: center; }
+  .stat-pill { display: none; }
+  .multitenant-wrap { flex-direction: column; }
+  .ticker-panel { width: 100%; min-height: 140px; }
+}
+@media (max-width: 480px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  header { grid-template-columns: auto 1fr auto; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="#">
+    <div class="logo-icon">
+      <svg viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="6" height="6" rx="1.8" fill="white" opacity=".95"/>
+        <rect x="9" y="1" width="6" height="6" rx="1.8" fill="white" opacity=".6"/>
+        <rect x="1" y="9" width="6" height="6" rx="1.8" fill="white" opacity=".6"/>
+        <rect x="9" y="9" width="6" height="6" rx="1.8" fill="white" opacity=".3"/>
+      </svg>
+    </div>
+    <span class="logo-text">Glassbox Console</span>
+  </a>
+
+  <div class="search-wrap">
+    <span class="search-icon">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </span>
+    <input id="search" type="search" placeholder="Search environments…" autocomplete="off" spellcheck="false">
+  </div>
+
+  <div class="header-right">
+    <div class="stat-pill"><span class="dot"></span><span id="activeCount">0</span> environments</div>
+
+    <!-- USEFUL LINKS -->
+    <div class="links-btn-wrap" id="linksBtnWrap">
+      <button class="links-btn" id="linksBtn" aria-haspopup="true" aria-expanded="false">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5.5 2.5H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7.5 1.5H11.5V5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.5 1.5L6.5 6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Useful Links
+      </button>
+      <div class="links-dropdown" id="linksDropdown" role="menu">
+        <div class="links-dropdown-header">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".4"/><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span>Quick Access</span>
+        </div>
+        <div class="links-list" id="linksList"></div>
+      </div>
+    </div>
+
+    <button class="toggle-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">
+      <span id="themeIcon">☀️</span>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+  <section class="section" id="sec-recent" data-section>
+    <div class="section-header" data-toggle>
+      <div>
+        <div class="section-eyebrow">Auto-tracked</div>
+        <div class="section-name">Recently Visited</div>
+      </div>
+      <button class="clear-recent" id="clearRecent" title="Clear history">Clear</button>
+      <span class="section-count" id="recentCount">0</span>
+      <span class="section-toggle">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </div>
+    <div class="section-body">
+      <div class="grid" id="recentGrid"></div>
+    </div>
+  </section>
+
+  <div class="no-results" id="noResults">
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="18" cy="18" r="11" stroke="currentColor" stroke-width="2"/><path d="M26.5 26.5L35 35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13 18h10M18 13v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <h3>No environments found</h3>
+    <p>Try a different search term.</p>
+  </div>
+</main>
+
+<footer>
+  <span>Glassbox Console v2.1</span>
+  <span class="footer-mid">Internal Dashboard · Shay Danny</span>
+  <span id="clock"></span>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   USEFUL LINKS CONFIG — add more items here
+*/
+const USEFUL_LINKS = [
+  {
+    name: 'Detector Script Versions',
+    desc: 'Check & compare detector builds',
+    url:  'https://cdn.gbqofs.com/supportUtils/detector_upgrade.html',
+    icon: '🔍',
+    iconBg: 'rgba(124,92,252,.15)',
+    tag: '',
+  },
+  /* Add more links here:
+  {
+    name: 'Another Tool',
+    desc: 'Short description',
+    url:  'https://...',
+    icon: '🛠',
+    iconBg: 'rgba(31,200,164,.15)',
+  },
+  */
+];
+
+/* ═══════════════════════════════════════════════════════
+   TICKER MESSAGES CONFIG — edit or add messages here
+*/
+const TICKER_MESSAGES = [
+  {
+    label: 'Tip',
+    text:  'Use <em>Ctrl+K</em> to jump to search instantly from anywhere.',
+    tag:   '<span class="tag tag-info">Shortcut</span>',
+  },
+  {
+    label: 'Reminder',
+    text:  'Multi-tenant environments share a single Glassbox instance across several clients.',
+    tag:   '<span class="tag tag-warn">Multi-tenant</span>',
+  },
+  {
+    label: 'New',
+    text:  'Detector Script Versions tool is now available under Useful Links.',
+    tag:   '<span class="tag tag-ok">Update</span>',
+  },
+  {
+    label: 'Tip',
+    text:  'Click any environment card to open the Glassbox Hub for that tenant.',
+    tag:   '<span class="tag tag-info">Navigation</span>',
+  },
+  {
+    label: 'Hot',
+    text:  'Recently visited environments are auto-tracked at the top of this page.',
+    tag:   '<span class="tag tag-hot">Feature</span>',
+  },
+  {
+    label: 'Reminder',
+    text:  'Environments are live — changes in one tenant do <em>not</em> affect others.',
+    tag:   '<span class="tag tag-warn">Isolation</span>',
+  },
+];
+
+/* ═══════════════════════════════════════════════════════
+   SECTIONS CONFIG
+*/
+const SECTIONS = [
+  {
+    id: 'glassbox',
+    eyebrow: 'Internal',
+    name: 'Glassbox',
+    items: [
+      {
+        name: 'GB Demo',
+        url: 'https://console.gbdemo.glassboxdigital.io/webinterface/webui/glassbox-hub',
+        color: 'c-violet',
+        logoDark:  'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg',
+        logoLight: 'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg',
+      },
+    ],
+  },
+  {
+    id: 'customers',
+    eyebrow: 'Live',
+    name: 'Customers',
+    items: [
+      { name:'Maccabi', aliases:['מכבי','מכבי בריאות','קופת חולים'], url:'https://consolegb.maccabi.glassboxdigital.io/webinterface/webui/glassbox-hub', color:'c-indigo', logoDark:'https://www.maccabi4u.co.il/media/xtxhwsfh/%D7%9C%D7%95%D7%92%D7%95-%D7%9E%D7%9B%D7%91%D7%99_%D7%90%D7%93%D7%A8-%D7%93%D7%A1%D7%A7%D7%98%D7%95%D7%A4.svg', logoLight:'https://www.maccabi4u.co.il/media/xtxhwsfh/%D7%9C%D7%95%D7%92%D7%95-%D7%9E%D7%9B%D7%91%D7%99_%D7%90%D7%93%D7%A8-%D7%93%D7%A1%D7%A7%D7%98%D7%95%D7%A4.svg' },
+      { name:'Leumit', aliases:['לאומית','קופת חולים לאומית'], url:'https://consolegb.leumit.glassboxdigital.io/webinterface/webui/glassbox-hub', color:'c-pink', logoDark:'https://www.leumit.co.il/media/rwsdhs1u/36467_113985_leumit_website_bnrs_logo_208x52_05.png?width=208&v=1dc6f559785bda0', logoLight:'https://www.leumit.co.il/media/pxvdlhty/36467_113985_leumit_website_bnrs_logo_208x52_02.png?width=208&v=1dc6f559791f2a0' },
+      { name:'Mizrahi', aliases:['מזרחי','מזרחי טפחות','בנק מזרחי'], url:'https://consolegb.mizrahi.glassboxdigital.io/webinterface/webui/glassbox-hub', color:'c-orange', logoDark:'https://yt3.ggpht.com/zu6AIE-2Ann9CFeDJBaWWGXN5QlTQQw4ZAsTl07jXcR3sbGanMxEVevolwJIxZq0mRRrl-08SGg=s68-c-k-c0x00ffffff-no-rj', logoLight:'https://www.mizrahi-tefahot.co.il/media/vlwlbdf2/logo.svg' },
+      { name:'Clal', aliases:['כלל','כלל ביטוח'], url:'https://consolegb.clal.glassboxdigital.io/webinterface/webui/glassbox-hub', color:'c-sky', logoDark:'https://www.clalbit.co.il/AngularClient/dist/assets/images/header/logo-eng-heb.svg', logoLight:'https://www.clalbit.co.il/AngularClient/dist/assets/images/header/logo-eng-heb.svg' },
+      { name:'WeSure', aliases:['וישור','וי שור'], url:'https://consolegb.wesure.glassboxdigital.io/webinterface/webui/glassbox-hub', color:'c-rose', logoDark:'https://we-sure.co.il/wp-content/themes/wesure/dist/images/logo.png', logoLight:'https://we-sure.co.il/wp-content/themes/wesure/dist/images/logo-footer.png' },
+      { name:'Govi', aliases:['גובי','ממשלה','gov'], url:'https://consolegb.govi.glassboxdigital.io/webinterface/webui', color:'c-indigo', logoDark:'https://www.gov.il/govilHF/cdn/favicon.ico', logoLight:'https://www.gov.il/govilHF/cdn/favicon.ico' },
+      { name:'mcourt', aliases:['בית משפט','בתי משפט','mcourt'], url:'https://consolegb.mcourt-il.glassboxdigital.io/webinterface/webui', color:'c-sky', logoDark:'https://www.gov.il/BlobFolder/news/spokemanmessage06092022/he/netlaw.jpg', logoLight:'https://www.gov.il/BlobFolder/news/spokemanmessage06092022/he/netlaw.jpg' },
+      { name:'Jerusalem Bank', sub:'JBNK', aliases:['בנק ירושלים','ירושלים'], url:'https://consolegb.jbnk.glassboxdigital.io/webinterface/webui/glassbox-hub', color:'c-amber', logoDark:'https://www.bankjerusalem.co.il/media/5799/logo-heb.svg?width=190&height=30', logoLight:'https://www.bankjerusalem.co.il/media/5799/logo-heb.svg' },
+      { name:'Justice', aliases:['המשפטים','משרד המשפטים'], url:'https://consolegb.justice.glassboxdigital.io/webinterface/webui/glassbox-hub', color:'c-indigo', logoDark:'https://www.gov.il/OfficeLogo/menora.png', logoLight:'https://www.gov.il/OfficeLogo/menora.png' },
+      { name:'ZIM', aliases:['צים'], url:'https://consolegb.zim.glassboxdigital.io/webinterface/webui', color:'c-indigo', logoDark:'https://www.zim.com/assets/wmapisip/logo_zim_2026_313x112-light.png?v=1dcf653fc06e120', logoLight:'https://www.zim.com/assets/uzzfnajh/logo_zim_2026_313x112-dark.png?v=1dcf65404cf9130' },
+      { name:'Bursa', aliases:['בורסה לניירות ערך'], url:'https://consolegb.bursa.glassboxdigital.io/webinterface/webui', color:'c-indigo', logoDark:'https://content.tase.co.il/media/a1pn5jds/logo.svg', logoLight:'https://market.tase.co.il/assets/auth0_login/img/tase-login-logo-he.svg' },
+      { name:'OneZero', aliases:['בנק דיגיטלי','01'], url:'https://consolegb.onezero.glassboxdigital.io/webinterface/webui', color:'c-amber', logoDark:'https://www.onezerobank.com/lp/main1/assets/onezero-logo-black-977913ad.svg', logoLight:'https://www.onezerobank.com/lp/main1/assets/onezero-logo-black-977913ad.svg' },
+      { name:'Assuta', aliases:['בית חולים','אסותא'], url:'https://consolegb.assuta.glassboxdigital.io/webinterface/webui', color:'c-indigo', logoDark:'https://www.assuta.co.il/images/assuta_logo_90.svg', logoLight:'https://www.assuta.co.il/images/assuta_logo_90.svg' },
+      { name:'Ayalon', aliases:['איילון'], url:'https://console.ayalon.glassboxdigital.io/webinterface/webui/glassbox-hub', color:'c-purple', logoDark:'https://www.ayalon-ins.co.il/mediastorage/media/loyj0oof/ayalon_b_dark.svg', logoLight:'https://www.ayalon-ins.co.il/mediastorage/media/loyj0oof/ayalon_b_dark.svg' },
+      { name:'Mimun', aliases:['מימון ישיר'], url:'https://consolegb.mimun.glassboxdigital.io/webinterface/webui/', color:'c-green', logoDark:'https://my.5555.co.il/Content/img/logo-footer.svg', logoLight:'https://my.5555.co.il/Content/img/logo-footer.svg' },
+      { name:'IEC', aliases:['חברת חשמל'], url:'https://consolegb.iec.glassboxdigital.io/webinterface/webui', color:'c-gold', logoDark:'https://www.iec.co.il/assets/images/svg/logo-with-text.svg', logoLight:'https://www.iec.co.il/assets/images/svg/logo-with-text.svg' },
+    ],
+  },
+  {
+    id: 'multi-tenant',
+    eyebrow: 'Shared',
+    name: 'Multi Tenant',
+    ticker: true,
+    items: [
+      { name:'C1101', sub:'Cellcom & Fattal', aliases:['סלקום','פתאל'], url:'https://console.c1101.glassboxdigital.io/webinterface/login/', color:'c-violet', logoDark:'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg', logoLight:'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg' },
+      { name:'C3001', sub:'CBS · Post · Aliyah · TLV', aliases:['משרד הקליטה','עיריית תל אביב','דואר ישראל','הלמ"ס','סטטיסטיקה','ת"א','לשכה'], url:'https://console.c3001.glassboxdigital.io/webinterface/login/', color:'c-violet', logoDark:'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg', logoLight:'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg' },
+      { name:'GB POV', sub:'NessPro tenant', aliases:['Nesspro','POC'], url:'https://console.gb-pov.glassboxdigital.io/webinterface/login/', color:'c-violet', logoDark:'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg', logoLight:'https://www.glassbox.com/images/logos/glassbox-logo-dark.svg' },
+    ],
+  },
+];
+
+/* ═══════════════════════════════════════════════════════
+   HELPERS
+*/
+const ARROW = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4.5M10 2V7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const CHEV  = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+function monogram(name){ return name.replace(/[^A-Z0-9]/gi,'').slice(0,2).toUpperCase()||'??'; }
+function timeAgo(ts){
+  const d=(Date.now()-ts)/1000;
+  if(d<60)   return 'Just now';
+  if(d<3600) return Math.floor(d/60)+'m ago';
+  if(d<86400)return Math.floor(d/3600)+'h ago';
+  return Math.floor(d/86400)+'d ago';
+}
+
+function buildCard(item, tsLabel){
+  const hasDark  = item.logoDark && item.logoDark.trim();
+  const hasLight = item.logoLight && item.logoLight.trim();
+  const sub = item.sub ? `<span class="card-sub">${item.sub}</span>` : '';
+  const ts  = tsLabel  ? `<span class="card-ts">${tsLabel}</span>` : '';
+  const imgs = hasDark
+    ? `<img class="img-dark"  src="${item.logoDark}"  alt="${item.name}" loading="lazy" onerror="this.style.display='none'">
+       <img class="img-light" src="${hasLight?item.logoLight:item.logoDark}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'">`
+    : `<span class="monogram">${monogram(item.name)}</span>`;
+  return `
+<a href="${item.url}" class="card ${item.color}" target="_blank" rel="noopener"
+   data-name="${[item.name,item.sub||'',...(item.aliases||[])].join(' ').toLowerCase()}"
+   data-url="${item.url}">
+  <div class="card-bar"></div>
+  <div class="card-img">${imgs}</div>
+  <div class="card-foot">
+    <div class="card-foot-text">
+      <div class="card-name">${item.name}</div>
+      ${sub}${ts}
+    </div>
+    <span class="card-arrow">${ARROW}</span>
+  </div>
+</a>`;
+}
+
+function buildSection(sec){
+  const gridHTML = sec.items.map(i=>buildCard(i)).join('');
+
+  let bodyHTML;
+  if(sec.ticker){
+    bodyHTML = `
+      <div class="multitenant-wrap">
+        <div class="multitenant-grid">${gridHTML}</div>
+        <div class="ticker-panel" id="tickerPanel">
+          <div class="ticker-header">
+            <span class="ticker-dot"></span>
+            <span class="ticker-title">Live Feed</span>
+          </div>
+          <div class="ticker-body">
+            <div class="ticker-track" id="tickerTrack"></div>
+          </div>
+        </div>
+      </div>`;
+  } else {
+    bodyHTML = `<div class="grid">${gridHTML}</div>`;
+  }
+
+  return `
+<section class="section" id="sec-${sec.id}" data-section>
+  <div class="section-header" data-toggle>
+    <div>
+      <div class="section-eyebrow">${sec.eyebrow}</div>
+      <div class="section-name">${sec.name}</div>
+    </div>
+    <span class="section-count">${sec.items.length}</span>
+    <span class="section-toggle">${CHEV}</span>
+  </div>
+  <div class="section-body">${bodyHTML}</div>
+</section>`;
+}
+
+const mainEl = document.getElementById('main');
+mainEl.insertAdjacentHTML('beforeend', SECTIONS.map(buildSection).join(''));
+
+document.getElementById('activeCount').textContent =
+  SECTIONS.reduce((a,s)=>a+s.items.length, 0);
+
+/* ═══════════════════════════════════════════════════════
+   USEFUL LINKS — render dropdown
+*/
+const linksList = document.getElementById('linksList');
+linksList.innerHTML = USEFUL_LINKS.map(l=>`
+  <a href="${l.url}" class="link-item" target="_blank" rel="noopener" role="menuitem">
+    <div class="link-icon" style="background:${l.iconBg||'rgba(124,92,252,.12)'}">${l.icon||'🔗'}</div>
+    <div class="link-info">
+      <div class="link-name">${l.name}</div>
+      <div class="link-desc">${l.desc||''}</div>
+    </div>
+    <span class="link-arrow">↗</span>
+  </a>`).join('');
+
+const linksBtn      = document.getElementById('linksBtn');
+const linksDropdown = document.getElementById('linksDropdown');
+linksBtn.addEventListener('click', e=>{
+  e.stopPropagation();
+  const open = linksDropdown.classList.toggle('open');
+  linksBtn.setAttribute('aria-expanded', open);
+});
+document.addEventListener('click', ()=>{
+  linksDropdown.classList.remove('open');
+  linksBtn.setAttribute('aria-expanded','false');
+});
+linksDropdown.addEventListener('click', e=>e.stopPropagation());
+
+/* ═══════════════════════════════════════════════════════
+   TICKER
+*/
+(function initTicker(){
+  const track = document.getElementById('tickerTrack');
+  if(!track) return;
+
+  const msgs = TICKER_MESSAGES;
+  let idx = 0;
+  const VISIBLE = 3;
+  const MSG_HEIGHT = 90;
+
+  // Render all messages into the track (looped: extra copy so wrap is seamless)
+  const doubled = [...msgs, ...msgs];
+  track.innerHTML = doubled.map(m=>`
+    <div class="ticker-msg">
+      <strong>${m.label}</strong>
+      ${m.text}
+      ${m.tag||''}
+    </div>`).join('');
+
+  function advance(){
+    idx++;
+    if(idx >= msgs.length) idx = 0;
+    track.style.transform = `translateY(-${idx * MSG_HEIGHT}px)`;
+    // Reset silently after full cycle
+    if(idx === msgs.length - 1){
+      setTimeout(()=>{
+        track.style.transition = 'none';
+        track.style.transform = 'translateY(0)';
+        idx = 0;
+        setTimeout(()=>{ track.style.transition = ''; }, 50);
+      }, 800);
+    }
+  }
+  setInterval(advance, 3800);
+})();
+
+/* ═══════════════════════════════════════════════════════
+   RECENTLY VISITED
+*/
+const RECENT_KEY='gb-recent', MAX_RECENT=6;
+const ALL_ITEMS={};
+SECTIONS.forEach(s=>s.items.forEach(i=>{ ALL_ITEMS[i.url]=i; }));
+
+function loadRecent(){ try{return JSON.parse(localStorage.getItem(RECENT_KEY)||'[]');}catch{return[];} }
+function saveRecent(a){ localStorage.setItem(RECENT_KEY,JSON.stringify(a)); }
+function renderRecent(){
+  const entries=loadRecent();
+  const secEl=document.getElementById('sec-recent');
+  const grid=document.getElementById('recentGrid');
+  const count=document.getElementById('recentCount');
+  if(!entries.length){secEl.classList.remove('has-items');return;}
+  grid.innerHTML=entries.map(e=>{
+    const item=ALL_ITEMS[e.url]; if(!item)return'';
+    return buildCard(item,timeAgo(e.ts));
+  }).filter(Boolean).join('');
+  attachClickListeners(grid);
+  count.textContent=entries.filter(e=>ALL_ITEMS[e.url]).length;
+  secEl.classList.add('has-items');
+}
+function recordVisit(url){
+  if(!ALL_ITEMS[url])return;
+  let arr=loadRecent().filter(e=>e.url!==url);
+  arr.unshift({url,ts:Date.now()});
+  arr=arr.slice(0,MAX_RECENT);
+  saveRecent(arr);
+}
+function attachClickListeners(container){
+  container.querySelectorAll('.card[data-url]').forEach(card=>{
+    card.addEventListener('click',()=>recordVisit(card.dataset.url));
+  });
+}
+attachClickListeners(mainEl);
+document.getElementById('clearRecent').addEventListener('click',e=>{
+  e.stopPropagation(); saveRecent([]); renderRecent();
+});
+renderRecent();
+
+/* ═══════════════════════════════════════════════════════
+   COLLAPSE
+*/
+document.querySelectorAll('[data-toggle]').forEach(hdr=>{
+  hdr.addEventListener('click',()=>hdr.closest('[data-section]').classList.toggle('collapsed'));
+});
+
+/* ═══════════════════════════════════════════════════════
+   SEARCH
+*/
+const searchEl=document.getElementById('search');
+const noResults=document.getElementById('noResults');
+function runSearch(q){
+  q=q.trim();
+  const qLower=q.toLowerCase();
+  const secRecent=document.getElementById('sec-recent');
+  if(secRecent) secRecent.style.display=q?'none':'';
+  let total=0;
+  document.querySelectorAll('[data-section]').forEach(sec=>{
+    if(sec.id==='sec-recent')return;
+    let vis=0;
+    sec.querySelectorAll('.card').forEach(card=>{
+      const haystack=card.dataset.name||'';
+      const match=!q||haystack.includes(qLower)||haystack.includes(q);
+      card.style.display=match?'':'none';
+      if(match)vis++;
+    });
+    sec.style.display=vis===0?'none':'';
+    total+=vis;
+  });
+  noResults.classList.toggle('visible',total===0&&q!=='');
+}
+searchEl.addEventListener('input',e=>runSearch(e.target.value));
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();searchEl.focus();searchEl.select();}
+  if(e.key==='Escape'&&document.activeElement===searchEl){searchEl.value='';runSearch('');searchEl.blur();}
+});
+
+/* ═══════════════════════════════════════════════════════
+   THEME
+*/
+const root=document.documentElement;
+const themeIcon=document.getElementById('themeIcon');
+function applyTheme(t){
+  root.setAttribute('data-theme',t);
+  themeIcon.textContent=t==='dark'?'☀️':'🌙';
+  localStorage.setItem('gb-theme',t);
+}
+applyTheme(localStorage.getItem('gb-theme')||'dark');
+document.getElementById('themeBtn').addEventListener('click',()=>
+  applyTheme(root.getAttribute('data-theme')==='dark'?'light':'dark')
+);
+
+/* ═══════════════════════════════════════════════════════
+   CLOCK
+*/
+const clockEl=document.getElementById('clock');
+const tick=()=>clockEl.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+tick(); setInterval(tick,30000);
+</script>
+</body>
+</html>
